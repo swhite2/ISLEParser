@@ -1,0 +1,103 @@
+﻿@model ISLEParser.Models.WorkspaceItems.WorkspaceItemViewModel
+
+
+@if (Model.RgbMatrix == null)
+{
+    <table class="table table-dark">
+        <thead>
+            <tr>
+                <th class="text-center" scope="col">ID</th>
+                <th class="text-center" scope="col">Name</th>
+                <th class="text-center" scope="col">Type</th>
+                <th class="text-center" scope="col">Speed - Fade In</th>
+                <th class="text-center" scope="col">Speed - Fade Out</th>
+                <th class="text-center" scope="col">Linked RGB Matrices</th>
+                <th class="text-center" scope="col">Duration</th>
+                <th class="text-center" scope="col">Direction</th>
+                <th class="text-center" scope="col">Run Order</th>
+                <th class="text-center" scope="col">Commands</th>
+
+            </tr>
+        </thead>
+        <tbody>
+
+
+            <tr>
+                <td class="text-center">@Model.Script.Id</td>
+                <td class="text-center">@Model.Script.Name</td>
+                <td class="text-center">@Model.Script.Type</td>
+                <td class="text-center">@Model.Script.SpeedFadeInAttribute</td>
+                <td class="text-center">@Model.Script.SpeedFadeOutAttribute</td>
+                @foreach(var item in Model.Script.RgbMatrices)
+                {
+                    <td class="text-center">@item.Name</td>
+                }
+                <td class="text-center">@Model.Script.SpeedDurationAttribute</td>
+                <td class="text-center">@Model.Script.Direction</td>
+                <td class="text-center">@Model.Script.RunOrder</td>
+                @foreach (var item in Model.Script.Commands)
+                {
+                    <td class="text-center">@item</td>
+                }
+                
+            </tr>
+
+
+
+
+
+        </tbody>
+    </table>
+
+}
+else
+{
+    <table class="table table-dark">
+        <thead>
+            <tr>
+                <th class="text-center" scope="col">ID</th>
+                <th class="text-center" scope="col">Name</th>
+                <th class="text-center" scope="col">Type</th>
+                <th class="text-center" scope="col">Path (Linked script)</th>
+                <th class="text-center" scope="col">Speed - Fade In</th>
+                <th class="text-center" scope="col">Speed - Fade Out</th>
+                <th class="text-center" scope="col">Duration</th>
+                <th class="text-center" scope="col">Direction</th>
+                <th class="text-center" scope="col">Run Order</th>
+                <th class="text-center" scope="col">Dimmer Control</th>
+                <th class="text-center" scope="col">Mono Color</th>
+                <th class="text-center" scope="col">Fixture Group (RGB Panel)</th>
+                <th class="text-center" scope="col">Algorithm Type</th>
+                <th class="text-center" scope="col">Algorithm Name</th>
+            </tr>
+        </thead>
+        <tbody>
+
+
+            <tr>
+                <td class="text-center">@Model.RgbMatrix.Id</td>
+                <td class="text-center">@Model.RgbMatrix.Name</td>
+                <td class="text-center">@Model.RgbMatrix.Type</td>
+                <td class="text-center">@Model.RgbMatrix.Path.Name</td>
+                <td class="text-center">@Model.RgbMatrix.SpeedFadeInAttribute</td>
+                <td class="text-center">@Model.RgbMatrix.SpeedFadeOutAttribute</td>
+                <td class="text-center">@Model.RgbMatrix.SpeedDurationAttribute</td>
+                <td class="text-center">@Model.RgbMatrix.Direction</td>
+                <td class="text-center">@Model.RgbMatrix.RunOrder</td>
+                <td class="text-center">@Model.RgbMatrix.DimmerControl</td>
+                <td class="text-center">@Model.RgbMatrix.MonoColor</td>
+                <td class="text-center">@Model.RgbMatrix.FixtureGroup</td>
+                <td class="text-center">@Model.RgbMatrix.AlgorithmTypeAttribute</td>
+                <td class="text-center">@Model.RgbMatrix.AlgorithmName</td>
+            </tr>
+
+
+
+
+
+        </tbody>
+    </table>
+
+}
+
+

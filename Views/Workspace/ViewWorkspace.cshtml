@@ -1,0 +1,62 @@
+﻿
+@model ISLEParser.Models.WorkspaceItems.WorkspaceItemListViewModel
+
+<style>
+    #EditButton:link, #EditButton:visited, #DeleteButton:link, #DeleteButton:visited {
+        background-color: #f44336;
+        color: white;
+        padding: 14px 25px;
+        text-align: center;
+        text-decoration: none;
+        display: inline-block;
+    }
+
+    #EditButton:hover, #EditButton:active, #DeleteButton:hover, #DeleteButton:active {
+        background-color: red;
+    }
+</style>
+
+<div class="dropdown text-center">
+    <button type="button" class="btn btn-primary dropdown-toggle" data-toggle="dropdown">
+        Sort by
+    </button>
+    <div class="dropdown-menu">
+        <a class="dropdown-item" asp-action="GetWorkspaceScripts" asp-controller="Workspace" asp-route-name="@Model.WorkspaceName">Scripts</a>
+        <a class="dropdown-item" asp-action="GetWorkspaceRgbMatrices" asp-controller="Workspace" asp-route-name="@Model.WorkspaceName">RGB Matrices</a>
+        <a class="dropdown-item" asp-action="GetWorkspaceAllItems" asp-controller="Workspace" asp-route-name="@Model.WorkspaceName">All</a>
+    </div>
+</div>
+
+<table class="table table-dark">
+    <thead>
+        <tr>
+            <th class="text-center" scope="col">ID</th>
+            <th class="text-center" scope="col">Name</th>
+            <th class="text-center" scope="col">Type</th>
+            <th class="text-center" scope="col">ModalLink</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model.WorkspaceItems)
+        {
+
+        <tr>
+            <td class="text-center">@item.Id</td>
+            <td class="text-center">@item.Name</td>
+            <td class="text-center">@item.Type</td>
+            <td class="text-center">
+                <a id="EditButton" asp-action="GetWorkspaceItem" asp-controller="WorkspaceItems" asp-route-id=@item.Id asp-route-name="@Model.WorkspaceName" asp-route-type="@item.Type">Edit</a>
+            </td>
+            <td class="text-center">
+                <a id="DeleteButton" asp-action="DeleteWorkspaceItem" asp-controller="WorkspaceItems" asp-route-id=@item.Id asp-route-name="@Model.WorkspaceName" asp-route-type="@item.Type">Delete</a>
+            </td>
+        </tr>
+        }
+
+
+
+
+    </tbody>
+</table>
+
+

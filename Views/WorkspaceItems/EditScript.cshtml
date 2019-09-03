@@ -1,0 +1,99 @@
+﻿@model ISLEParser.Models.WorkspaceItems.WorkspaceItemViewModel
+<div id="container" class="container">
+        <div class="col-lg-6 offset-lg-3 text-center">
+            <form class="text-center" asp-action="EditSkill" asp-controller="WorkspaceItems">
+                <div class="form-group">
+                    <label><b>Function ID: </b>@Model.Script.Id</label>
+                </div>
+                <div class="form-group">
+                    <label for="exampleFormControlInput1">Function Name</label>
+                    <input type="text" class="form-control" id="exampleFormControlInput1" placeholder="@Model.Script.Name">
+                </div>
+                <div class="form-group">
+                    <label for="exampleFormControlInput1">Function Type</label>
+                    <input type="text" class="form-control" id="exampleFormControlInput1" placeholder="@Model.Script.Type">
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group col-md-4">
+                        <label for="inputSpeedFadeIn">Speed - Fade In</label>
+                        <input type="text" class="form-control" id="inputSpeedFadeIn" placeholder="@Model.Script.SpeedFadeInAttribute">
+                    </div>
+                    <div class="form-group col-md-4">
+                        <label for="inputSpeedFadeOut">Speed - Fade Out</label>
+                        <input type="text" class="form-control" id="inputSpeedFadeOut" placeholder="@Model.Script.SpeedFadeOutAttribute">
+                    </div>
+                    <div class="form-group col-md-4">
+                        <label for="inputSpeedDuration">Speed - Duration</label>
+                        <input type="text" class="form-control" id="inputSpeedDuration" placeholder="@Model.Script.SpeedDurationAttribute">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="inputDirection">Direction</label>
+                    <select class="form-control" id="inputDirection">
+                        <option selected>Forward</option>
+                        <option>Backwards</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="inputRunOrder">Run Order</label>
+                    <select class="form-control" id="inputRunOrder">
+                        <option selected>Loop</option>
+                        <option>PingPong</option>
+                        <option>SingleShot</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="standardCommands">Commands</label>
+                    <textarea class="form-control" id="standardCommands" rows="8">
+                    @foreach(var item in Model.Script.Commands)
+                    {
+                        @(item + "\n");
+                    }
+                    </textarea>
+                </div>
+                <div class="form-group">
+                    <label><b>Linked RGB Matrices:</b></label>
+                </div>
+                @*<div class="form-group">
+                    <ul class="list-group">
+                        @foreach (var item in Model.Script.RgbMatrices)
+                        {
+                            <li class="list-group-item">@item.Name</li>
+                            <li class="list-group-item">@item.AlgorithmName</li>
+                        }
+                        </ul>
+                </div>*@
+                <div class="form-group">
+                    <table class="table table-dark">
+                        <thead>
+                            <tr>
+                                <th scope="col">ID</th>
+                                <th scope="col">RGB Matrix</th>
+                                <th scope="col">JavaScript File</th>
+                                <th scope="col">RGB Panel</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var item in Model.Script.RgbMatrices) {
+                            <tr>
+                                <th scope="row">@item.Id</th>
+                                <td>@item.Name</td>
+                                <td>@item.AlgorithmName</td>
+                                <td>@item.FixtureGroup</td>
+                            </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+                <button type="submit" class="btn btn-primary">Sign in</button>
+            </form>
+
+            <form class="text-center" asp-controller="Home" asp-action="UploadFileViaModel" method="post"
+                  enctype="multipart/form-data">
+
+                <input type="file" name="FileToUpload" />
+                <button type="submit">Upload File (model)</button>
+            </form>
+            </div>
+</div>
