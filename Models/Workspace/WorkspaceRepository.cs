@@ -104,23 +104,30 @@ namespace ISLEParser.Models.Workspace
 
         public void DeleteWorkspaceScript(string Id, string Name)
         {
-            var path = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot/Workspaces", Name);
-            XDocument doc = XDocument.Load(path);
             XNamespace ns = "http://www.qlcplus.org/Workspace";
-            doc.Root
+            WorkspaceDictionary[Name].Content.Root
                 .Element(ns + "Engine")
                 .Elements(ns + "Function")
                 //.Where(item => (string)item.Attribute("Type") == "Script")
                 .Where(item => (string)item.Attribute("ID") == Id && (string)item.Attribute("Type") == "Script")
+                .FirstOrDefault()
                 .Remove();
-
-            WorkspaceDictionary[Name].Content = doc;
+            
             UpdateWorkspace(Name);          
         }
 
-        public void DeleteWorkspaceRgbMatrix(string Id, string WorkspaceName)
+        public void DeleteWorkspaceRgbMatrix(string Id, string Name)
         {
+            XNamespace ns = "http://www.qlcplus.org/Workspace";
+            WorkspaceDictionary[Name].Content.Root
+                .Element(ns + "Engine")
+                .Elements(ns + "Function")
+                //.Where(item => (string)item.Attribute("Type") == "Script")
+                .Where(item => (string)item.Attribute("ID") == Id && (string)item.Attribute("Type") == "RGBMatrix")
+                .FirstOrDefault()
+                .Remove();
 
+            UpdateWorkspace(Name);
         }
 
         public RgbMatrix GetWorkspaceRgbMatrix(string Id, string WorkspaceName)
@@ -221,9 +228,9 @@ namespace ISLEParser.Models.Workspace
         public WorkspaceItemListViewModel GetWorkspaceScripts(string Name)
         {
             var path = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot/Workspaces", Name);
-            XDocument doc = XDocument.Load(path);
+            WorkspaceDictionary[Name].Content = XDocument.Load(path);
             XNamespace ns = "http://www.qlcplus.org/Workspace";
-            var values = doc.Root
+            var values = WorkspaceDictionary[Name].Content.Root
                 .Element(ns + "Engine")
                 .Elements(ns + "Function")
                 .Where(item => (string)item.Attribute("Type") == "Script")
@@ -247,7 +254,7 @@ namespace ISLEParser.Models.Workspace
             var path = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot/Workspaces", Name);
             XDocument doc = XDocument.Load(path);
             XNamespace ns = "http://www.qlcplus.org/Workspace";
-            var values = doc.Root
+            var values = WorkspaceDictionary[Name].Content.Root
                 .Element(ns + "Engine")
                 .Elements(ns + "Function")
                 .Where(item => (string)item.Attribute("Type") == "RGBMatrix")
@@ -295,35 +302,15 @@ namespace ISLEParser.Models.Workspace
             return model;
         }
 
-
-        public async void UpdateWorkspace(string Name)
+        public void UpdateWorkspace(string WorkspaceName)
         {
-            //This method Flushes the content of the current XmlFile to the same file, replacing all data.
-            //IMPORTANT
-            //In order to properly generate a unique ID, both the RGBMatrices' and the Scripts' IDs need to be read, and start from the highest of those two (assuming there are no other functions)
-            var path = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot/Workspaces", Name);
-            using(FileStream DestinationStream = File.Create(path))
-            {
-                await WriteXmlAsync(DestinationStream, WorkspaceDictionary[Name].Content);
-                //await DestinationStream.FlushAsync();
-            }
+            var path = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot/Workspaces", WorkspaceName);
+            //save to file(overwrite)
+            WorkspaceDictionary[WorkspaceName].Content.Save(path, SaveOptions.None);
+            //Clean up memory
+            GC.Collect();
         }
-
-        private async Task WriteXmlAsync(Stream stream, XDocument doc)
-        {
-            XmlWriterSettings settings = new XmlWriterSettings();
-            settings.Async = true;
-            settings.Indent = true;
-            settings.CloseOutput = true;
-
-            using(XmlWriter writer = XmlWriter.Create(stream, settings))
-            {
-                await writer.WriteRawAsync(doc.ToString());
-                await writer.FlushAsync();
-                writer.Dispose();
-                writer.Close();
-            }
-        }
+        
 
 
 
@@ -334,6 +321,7 @@ namespace ISLEParser.Models.Workspace
 
             if (ele.HasAttribute(attributeToFind))
                 returnValue = ele.GetAttribute(attributeToFind);
+
 
             return returnValue;
         }

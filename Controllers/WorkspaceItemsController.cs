@@ -40,7 +40,8 @@ namespace ISLEParser.Controllers
         {
             if (Type.Equals("RGBMatrix"))
             {
-                //not implemented yet
+                repository.DeleteWorkspaceRgbMatrix(Id, Name);
+                return RedirectToAction("GetWorkspaceRgbMatrices", "Workspace", new { name = Name });
             }
             else
             {
@@ -48,8 +49,12 @@ namespace ISLEParser.Controllers
                 //TODO: Return partial view that confirms deletion
                 return RedirectToAction("GetWorkspaceScripts", "Workspace", new { name = Name });
             }
-            //return RedirectToAction("GetWorkspaceScripts", "Workspace", Name);
             throw new NotImplementedException();
+        }
+
+        public ViewResult AddScript(string Name)
+        {
+            return View("AddScript");
         }
 
         public IActionResult EditSkill(int Id, string WorkspaceName)
