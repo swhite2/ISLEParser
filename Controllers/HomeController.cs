@@ -23,6 +23,7 @@ namespace ISLEParser.Controllers
         }
         public ViewResult Index()
         {
+            GC.Collect();
             var model = new WorkspaceListViewModel();
             foreach(var item in workspaceRepository.GetAllWorkspaces())
             {

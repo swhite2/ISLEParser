@@ -8714,20 +8714,7 @@
       <MonoColor>4289593588</MonoColor>
       <FixtureGroup>6</FixtureGroup>
     </Function>
-    <Function ID="222" Type="Script" Name="Jellyfish - 10480">
-      <Speed FadeIn="0" FadeOut="0" Duration="0" />
-      <Direction>Forward</Direction>
-      <RunOrder>Loop</RunOrder>
-      <Command>startfunction%3A214%20%2F%2F%20Nieuwe%20RGB%20Matrix%202-1%20%28kopie%29%20%28kopie%29%20%28kopie%29</Command>
-      <Command>startfunction%3A215%20%2F%2F%20Nieuwe%20RGB%20Matrix%202-2%20%28kopie%29%20%28kopie%29%20%28kopie%29</Command>
-      <Command>startfunction%3A216%20%2F%2F%20Nieuwe%20RGB%20Matrix%202-3%20%28kopie%29%20%28kopie%29%20%28kopie%29</Command>
-      <Command>startfunction%3A217%20%2F%2F%20Nieuwe%20RGB%20Matrix%202-4%20%28kopie%29%20%28kopie%29%20%28kopie%29</Command>
-      <Command>startfunction%3A218%20%2F%2F%20Nieuwe%20RGB%20Matrix%202-5%20%28kopie%29%20%28kopie%29%20%28kopie%29</Command>
-      <Command>startfunction%3A219%20%2F%2F%20Nieuwe%20RGB%20Matrix%202-6%20%28kopie%29%20%28kopie%29%20%28kopie%29</Command>
-      <Command>startfunction%3A220%20%2F%2F%20Nieuwe%20RGB%20Matrix%202-7%20%28kopie%29%20%28kopie%29%20%28kopie%29</Command>
-      <Command>startfunction%3A221%20%2F%2F%20Nieuwe%20RGB%20Matrix%202-8%20%28kopie%29%20%28kopie%29%20%28kopie%29</Command>
-      <Command>wait%3A300s</Command>
-    </Function>
+    
     <Function ID="223" Type="RGBMatrix" Name="Nieuwe RGB Matrix 69 (kopie)" Path="Bubbles">
       <Speed FadeIn="118" FadeOut="236" Duration="118" />
       <Direction>Forward</Direction>
@@ -8800,20 +8787,7 @@
       <MonoColor>4294901760</MonoColor>
       <FixtureGroup>6</FixtureGroup>
     </Function>
-    <Function ID="231" Type="Script" Name="Bubbles">
-      <Speed FadeIn="0" FadeOut="0" Duration="0" />
-      <Direction>Forward</Direction>
-      <RunOrder>Loop</RunOrder>
-      <Command>startfunction%3A223%20%2F%2F%20Nieuwe%20RGB%20Matrix%2069%20%28kopie%29</Command>
-      <Command>startfunction%3A224%20%2F%2F%20Nieuwe%20RGB%20Matrix%2078%20%28kopie%29</Command>
-      <Command>startfunction%3A225%20%2F%2F%20Nieuwe%20RGB%20Matrix%2079%20%28kopie%29</Command>
-      <Command>startfunction%3A226%20%2F%2F%20Nieuwe%20RGB%20Matrix%2080%20%28kopie%29</Command>
-      <Command>startfunction%3A227%20%2F%2F%20Nieuwe%20RGB%20Matrix%2081%20%28kopie%29</Command>
-      <Command>startfunction%3A228%20%2F%2F%20Nieuwe%20RGB%20Matrix%2082%20%28kopie%29</Command>
-      <Command>startfunction%3A229%20%2F%2F%20Nieuwe%20RGB%20Matrix%2083%20%28kopie%29</Command>
-      <Command>startfunction%3A230%20%2F%2F%20Nieuwe%20RGB%20Matrix%2084%20%28kopie%29</Command>
-      <Command>wait%3A300s</Command>
-    </Function>
+    
     <Function ID="232" Type="RGBMatrix" Name="Nieuwe RGB Matrix 69 (kopie)" Path="Ink - 21536">
       <Speed FadeIn="118" FadeOut="236" Duration="118" />
       <Direction>Forward</Direction>

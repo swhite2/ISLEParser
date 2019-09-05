@@ -236,10 +236,10 @@ namespace ISLEParser.Models.Workspace
                 settings.DtdProcessing = DtdProcessing.Parse;
                 using (XmlReader reader = XmlReader.Create(st, settings))
                 {
-                    WorkspaceItemListViewModel model = new WorkspaceItemListViewModel();
                     if (WorkspaceDictionary[Name].Content == null)                    
                         WorkspaceDictionary[Name].Content = await XDocument.LoadAsync(reader, loadOptions, cancellationToken);
                     XNamespace ns = "http://www.qlcplus.org/Workspace";
+                    WorkspaceItemListViewModel model = new WorkspaceItemListViewModel();
                     var values = WorkspaceDictionary[Name].Content.Root
                         .Element(ns + "Engine")
                         .Elements(ns + "Function")
@@ -254,6 +254,8 @@ namespace ISLEParser.Models.Workspace
                             Type = item.Attribute("Type").Value
                         });
                     }
+                    st.Dispose();
+                    st.Close();
                     reader.Dispose();
                     reader.Close();
                     return model;
@@ -272,7 +274,8 @@ namespace ISLEParser.Models.Workspace
                 settings.DtdProcessing = DtdProcessing.Parse;
                 using(XmlReader reader = XmlReader.Create(st, settings))
                 {
-                    WorkspaceDictionary[Name].Content = await XDocument.LoadAsync(reader, loadOptions, cancellationToken);
+                    if (WorkspaceDictionary[Name].Content == null)
+                        WorkspaceDictionary[Name].Content = await XDocument.LoadAsync(reader, loadOptions, cancellationToken);
                     XNamespace ns = "http://www.qlcplus.org/Workspace";
                     var values = WorkspaceDictionary[Name].Content.Root
                         .Element(ns + "Engine")
@@ -290,7 +293,10 @@ namespace ISLEParser.Models.Workspace
                             Path = new Script { Name = item.Attribute("Path").Value }
                         });
                     }
-
+                    st.Dispose();
+                    st.Close();
+                    reader.Dispose();
+                    reader.Close();
                     return model;
                 }
             }
@@ -307,7 +313,8 @@ namespace ISLEParser.Models.Workspace
                 settings.DtdProcessing = DtdProcessing.Parse;
                 using (XmlReader reader = XmlReader.Create(st, settings))
                 {
-                    WorkspaceDictionary[Name].Content = await XDocument.LoadAsync(reader, loadOptions, cancellationToken);
+                    if (WorkspaceDictionary[Name].Content == null)
+                        WorkspaceDictionary[Name].Content = await XDocument.LoadAsync(reader, loadOptions, cancellationToken);
                     XNamespace ns = "http://www.qlcplus.org/Workspace";
                     var values = WorkspaceDictionary[Name].Content.Root
                         .Element(ns + "Engine")
@@ -335,7 +342,11 @@ namespace ISLEParser.Models.Workspace
                                 Type = item.Attribute("Type").Value
                             });
                         }
-                    }                  
+                    }
+                    st.Dispose();
+                    st.Close();
+                    reader.Dispose();
+                    reader.Close();
                     return model;
                 }
             }

@@ -32,7 +32,7 @@ namespace ISLEParser.Controllers
             return Content("File deleted");
         }
 
-        
+        //these functions should include caching, as all objects are stacked upon the large object heap
         public async Task<IActionResult> GetWorkspaceRgbMatrices(string Name)
         {
             WorkspaceItemListViewModel model = await workspaceRepository.GetWorkspaceRgbMatrices(Name, new CancellationToken(), new LoadOptions());

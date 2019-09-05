@@ -6,6 +6,9 @@ using System.Linq;
 using System.Threading.Tasks;
 using ISLEParser.Models.RgbMatrices;
 using ISLEParser.Models.Workspace;
+using Microsoft.AspNetCore.Http;
+using System.IO;
+using ISLEParser.Models.Home;
 
 namespace ISLEParser.Controllers
 {
@@ -55,6 +58,32 @@ namespace ISLEParser.Controllers
         public ViewResult AddScript(string Name)
         {
             return View("AddScript");
+        }
+
+        [HttpPost("UploadFiles")]
+        public IActionResult Post(List<IFormFile> files)
+        {
+            long size = files.Sum(f => f.Length);
+
+            var filePath = Path.GetTempFileName();
+
+            List<string> fileNames = new List<string>();
+            FilesViewModel model = new FilesViewModel();
+            foreach (var formFile in files)
+            {
+                fileNames.Add(Path.GetFileNameWithoutExtension(filePath));
+            }
+            foreach(var item in fileNames)
+            {
+                model.Files.Add(new FileDetails
+                {
+                    Name = item
+                });
+            }
+
+
+            return View("AddScript", model);
+
         }
 
         public IActionResult EditSkill(int Id, string WorkspaceName)
