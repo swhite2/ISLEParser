@@ -6123,20 +6123,7 @@
       <MonoColor>4294967295</MonoColor>
       <FixtureGroup>6</FixtureGroup>
     </Function>
-    <Function ID="10" Type="Script" Name="Earth Close-up">
-      <Speed FadeIn="42" FadeOut="84" Duration="42" />
-      <Direction>Forward</Direction>
-      <RunOrder>Loop</RunOrder>
-      <Command>startfunction%3A169%20%2F%2F%20Nieuwe%20RGB%20Matrix%2068%20%28kopie%29</Command>
-      <Command>startfunction%3A170%20%2F%2F%20Nieuwe%20RGB%20Matrix%2070%20%28kopie%29</Command>
-      <Command>startfunction%3A171%20%2F%2F%20Nieuwe%20RGB%20Matrix%2071%20%28kopie%29</Command>
-      <Command>startfunction%3A172%20%2F%2F%20Nieuwe%20RGB%20Matrix%2072%20%28kopie%29</Command>
-      <Command>startfunction%3A173%20%2F%2F%20Nieuwe%20RGB%20Matrix%2073%20%28kopie%29</Command>
-      <Command>startfunction%3A174%20%2F%2F%20Nieuwe%20RGB%20Matrix%2074%20%28kopie%29</Command>
-      <Command>startfunction%3A175%20%2F%2F%20Nieuwe%20RGB%20Matrix%2075%20%28kopie%29</Command>
-      <Command>startfunction%3A176%20%2F%2F%20Nieuwe%20RGB%20Matrix%2076%20%28kopie%29</Command>
-      <Command>wait%3A300s</Command>
-    </Function>
+    
     <Function ID="11" Type="Chaser" Name="Nieuwe chaser 11">
       <Speed FadeIn="45" FadeOut="942" Duration="91" />
       <Direction>Forward</Direction>
@@ -6145,20 +6132,7 @@
       <Step Number="0" FadeIn="0" Hold="0" FadeOut="0">0</Step>
       <Step Number="1" FadeIn="0" Hold="0" FadeOut="0">9</Step>
     </Function>
-    <Function ID="12" Type="Script" Name="Color Glowdient">
-      <Speed FadeIn="42" FadeOut="84" Duration="42" />
-      <Direction>Forward</Direction>
-      <RunOrder>Loop</RunOrder>
-      <Command>startfunction%3A151%20%2F%2F%20Nieuwe%20RGB%20Matrix%20100%20%28kopie%29</Command>
-      <Command>startfunction%3A152%20%2F%2F%20Nieuwe%20RGB%20Matrix%20101%20%28kopie%29</Command>
-      <Command>startfunction%3A153%20%2F%2F%20Nieuwe%20RGB%20Matrix%20102%20%28kopie%29</Command>
-      <Command>startfunction%3A154%20%2F%2F%20Nieuwe%20RGB%20Matrix%2095%20%28kopie%29</Command>
-      <Command>startfunction%3A155%20%2F%2F%20Nieuwe%20RGB%20Matrix%2096%20%28kopie%29</Command>
-      <Command>startfunction%3A156%20%2F%2F%20Nieuwe%20RGB%20Matrix%2097%20%28kopie%29</Command>
-      <Command>startfunction%3A157%20%2F%2F%20Nieuwe%20RGB%20Matrix%2098%20%28kopie%29</Command>
-      <Command>startfunction%3A158%20%2F%2F%20Nieuwe%20RGB%20Matrix%2099%20%28kopie%29</Command>
-      <Command>wait%3A300s</Command>
-    </Function>
+    
     <Function ID="13" Type="Scene" Name="New Scene" Hidden="True">
       <Speed FadeIn="0" FadeOut="0" Duration="0" />
     </Function>
@@ -6170,20 +6144,7 @@
       <Step Number="0" FadeIn="0" Hold="0" FadeOut="0" Values="84">0:0,17,1,85,2,216,3,17,4,85,5,216,6,17,7,85,8,216,9,17,10,85,11,216,12,17,13,85,14,216,15,17,16,85,17,216,18,17,19,85,20,216,21,17,22,85,23,216,24,17,25,85,26,216,27,17,28,85,29,216,30,17,31,85,32,216,33,17,34,85,35,216,36,17,37,85,38,216,39,17,40,85,41,216,42,17,43,85,44,216,45,17,46,85,47,216,48,17,49,85,50,216,51,17,52,85,53,216,54,17,55,85,56,216,57,17,58,85,59,216,60,17,61,85,62,216,63,17,64,85,65,216,66,17,67,85,68,216,69,17,70,85,71,216,72,17,73,85,74,216,75,17,76,85,77,216,78,17,79,85,80,216,81,17,82,85,83,216</Step>
       <Step Number="1" FadeIn="0" Hold="0" FadeOut="0" Values="168">0:0,17,1,85,2,216,3,17,4,85,5,216,6,17,7,85,8,216,9,17,10,85,11,216,12,17,13,85,14,216,15,17,16,85,17,216,18,17,19,85,20,216,21,17,22,85,23,216,24,17,25,85,26,216,27,17,28,85,29,216,30,17,31,85,32,216,33,17,34,85,35,216,36,17,37,85,38,216,39,17,40,85,41,216,42,17,43,85,44,216,45,17,46,85,47,216,48,17,49,85,50,216,51,17,52,85,53,216,54,17,55,85,56,216,57,17,58,85,59,216,60,17,61,85,62,216,63,17,64,85,65,216,66,17,67,85,68,216,69,17,70,85,71,216,72,17,73,85,74,216,75,17,76,85,77,216,78,17,79,85,80,216,81,17,82,85,83,216:1:0,191,1,249,2,231,3,191,4,249,5,231,6,191,7,249,8,231,9,191,10,249,11,231,12,191,13,249,14,231,15,191,16,249,17,231,18,191,19,249,20,231,21,191,22,249,23,231,24,191,25,249,26,231,27,191,28,249,29,231,30,191,31,249,32,231,33,191,34,249,35,231,36,191,37,249,38,231,39,191,40,249,41,231,42,191,43,249,44,231,45,191,46,249,47,231,48,191,49,249,50,231,51,191,52,249,53,231,54,191,55,249,56,231,57,191,58,249,59,231,60,191,61,249,62,231,63,191,64,249,65,231,66,191,67,249,68,231,69,191,70,249,71,231,72,191,73,249,74,231,75,191,76,249,77,231,78,191,79,249,80,231,81,191,82,249,83,231</Step>
     </Function>
-    <Function ID="15" Type="Script" Name="Abstract colors">
-      <Speed FadeIn="0" FadeOut="0" Duration="0" />
-      <Direction>Forward</Direction>
-      <RunOrder>Loop</RunOrder>
-      <Command>startfunction%3A196%20%2F%2F%20Nieuwe%20RGB%20Matrix%20100%20%28kopie%29%20%28kopie%29</Command>
-      <Command>startfunction%3A197%20%2F%2F%20Nieuwe%20RGB%20Matrix%20101%20%28kopie%29%20%28kopie%29</Command>
-      <Command>startfunction%3A198%20%2F%2F%20Nieuwe%20RGB%20Matrix%20102%20%28kopie%29%20%28kopie%29</Command>
-      <Command>startfunction%3A199%20%2F%2F%20Nieuwe%20RGB%20Matrix%2095%20%28kopie%29%20%28kopie%29</Command>
-      <Command>startfunction%3A200%20%2F%2F%20Nieuwe%20RGB%20Matrix%2096%20%28kopie%29%20%28kopie%29</Command>
-      <Command>startfunction%3A201%20%2F%2F%20Nieuwe%20RGB%20Matrix%2097%20%28kopie%29%20%28kopie%29</Command>
-      <Command>startfunction%3A202%20%2F%2F%20Nieuwe%20RGB%20Matrix%2098%20%28kopie%29%20%28kopie%29</Command>
-      <Command>startfunction%3A203%20%2F%2F%20Nieuwe%20RGB%20Matrix%2099%20%28kopie%29%20%28kopie%29</Command>
-      <Command>wait%3A300s</Command>
-    </Function>
+    
     <Function ID="16" Type="Script" Name="Watery Plasma">
       <Speed FadeIn="0" FadeOut="0" Duration="0" />
       <Direction>Forward</Direction>

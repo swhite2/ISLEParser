@@ -7,6 +7,8 @@ using System.Xml;
 using ISLEParser.Models.WorkspaceItems;
 using ISLEParser.Models.Scripts;
 using ISLEParser.Models.RgbMatrices;
+using System.Threading;
+using System.Xml.Linq;
 
 namespace ISLEParser.Models.Workspace
 {
@@ -20,9 +22,9 @@ namespace ISLEParser.Models.Workspace
         void DeleteWorkspaceScript(string Id, string Name);
         void DeleteWorkspaceRgbMatrix(string Id, string Name);
         IEnumerable<Workspace> GetAllWorkspaces();
-        WorkspaceItemListViewModel GetWorkspaceScripts(string Name);
-        WorkspaceItemListViewModel GetWorkspaceRgbMatrices(string Name);
-        WorkspaceItemListViewModel GetWorkspaceAllItems(string Name);
+        Task<WorkspaceItemListViewModel> GetWorkspaceScripts(string Name, CancellationToken cancellationToken, LoadOptions loadOptions);
+        Task<WorkspaceItemListViewModel> GetWorkspaceRgbMatrices(string Name, CancellationToken cancellationToken, LoadOptions loadOptions);
+        Task<WorkspaceItemListViewModel> GetWorkspaceAllItems(string Name, CancellationToken cancellationToken, LoadOptions loadOptions);
         //WorkspaceItemViewModel GetWorkspaceItem(int Id, string Name);
         RgbMatrix GetWorkspaceRgbMatrix(string Id, string WorkspaceName);
         Script GetWorkspaceScript(string Id, string WorkspaceName);

@@ -11,6 +11,7 @@ using ISLEParser.Models.RgbMatrices;
 using ISLEParser.Models.Scripts;
 using System.Xml.Linq;
 using ISLEParser.util;
+using System.Threading;
 
 namespace ISLEParser.Models.Workspace
 {
@@ -225,82 +226,123 @@ namespace ISLEParser.Models.Workspace
 
 
 
-        public WorkspaceItemListViewModel GetWorkspaceScripts(string Name)
+        public async Task<WorkspaceItemListViewModel> GetWorkspaceScripts(string Name, CancellationToken cancellationToken, LoadOptions loadOptions = LoadOptions.PreserveWhitespace)
         {
             var path = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot/Workspaces", Name);
-            WorkspaceDictionary[Name].Content = XDocument.Load(path);
-            XNamespace ns = "http://www.qlcplus.org/Workspace";
-            var values = WorkspaceDictionary[Name].Content.Root
-                .Element(ns + "Engine")
-                .Elements(ns + "Function")
-                .Where(item => (string)item.Attribute("Type") == "Script")
-                .ToList();
-            WorkspaceItemListViewModel model = new WorkspaceItemListViewModel();
-            foreach(var item in values)
+            using(StreamReader st = new StreamReader(path))
             {
-                model.WorkspaceItems.Add(new Script
+                XmlReaderSettings settings = new XmlReaderSettings();
+                settings.Async = true;
+                settings.DtdProcessing = DtdProcessing.Parse;
+                using (XmlReader reader = XmlReader.Create(st, settings))
                 {
-                    Name = item.Attribute("Name").Value,
-                    Id = item.Attribute("ID").Value,
-                    Type = item.Attribute("Type").Value
-                });
-            }
-
-            return model;
-        }
-
-        public WorkspaceItemListViewModel GetWorkspaceRgbMatrices(string Name)
-        {
-            var path = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot/Workspaces", Name);
-            XDocument doc = XDocument.Load(path);
-            XNamespace ns = "http://www.qlcplus.org/Workspace";
-            var values = WorkspaceDictionary[Name].Content.Root
-                .Element(ns + "Engine")
-                .Elements(ns + "Function")
-                .Where(item => (string)item.Attribute("Type") == "RGBMatrix")
-                .ToList();
-            WorkspaceItemListViewModel model = new WorkspaceItemListViewModel();
-            foreach (var item in values)
-            {
-                model.WorkspaceItems.Add(new RgbMatrix
-                {
-                    Name = item.Attribute("Name").Value,
-                    Id = item.Attribute("ID").Value,
-                    Type = item.Attribute("Type").Value,
-                    Path = new Script { Name = item.Attribute("Path").Value}
-                });
-            }
-
-            return model;
-
-        }
-
-        public WorkspaceItemListViewModel GetWorkspaceAllItems(string Name)
-        {
-
-            var path = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot/Workspaces", Name);
-            XDocument doc = XDocument.Load(path);
-            XNamespace ns = "http://www.qlcplus.org/Workspace";
-            var values = doc.Root
-                .Element(ns + "Engine")
-                .Elements(ns + "Function")
-                .Where(item => (string)item.Attribute("Type") == "RGBMatrix" && (string)item.Attribute("Type") == "Script")
-                .ToList();
-            WorkspaceItemListViewModel model = new WorkspaceItemListViewModel();
-            foreach(var item in values)
-            {
-                var attributeValue = item.Attribute("Type");
-                if (attributeValue.Equals("RGBMatrix"))
-                {
-                    model = GetWorkspaceRgbMatrices(Name);
-                }else if (attributeValue.Equals("Script"))
-                {
-                    model = GetWorkspaceScripts(Name);
+                    WorkspaceDictionary[Name].Content = await XDocument.LoadAsync(reader, loadOptions, cancellationToken);
+                    XNamespace ns = "http://www.qlcplus.org/Workspace";
+                    var values = WorkspaceDictionary[Name].Content.Root
+                        .Element(ns + "Engine")
+                        .Elements(ns + "Function")
+                        .Where(item => (string)item.Attribute("Type") == "Script")
+                        .ToList();
+                    WorkspaceItemListViewModel model = new WorkspaceItemListViewModel();
+                    foreach (var item in values)
+                    {
+                        model.WorkspaceItems.Add(new Script
+                        {
+                            Name = item.Attribute("Name").Value,
+                            Id = item.Attribute("ID").Value,
+                            Type = item.Attribute("Type").Value
+                        });
+                    }
+                    reader.Dispose();
+                    
+                    return model;
                 }
             }
 
-            return model;
         }
+
+        public async Task<WorkspaceItemListViewModel> GetWorkspaceRgbMatrices(string Name, CancellationToken cancellationToken, LoadOptions loadOptions = LoadOptions.PreserveWhitespace)
+        {
+            var path = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot/Workspaces", Name);
+            using (StreamReader st = new StreamReader(path))
+            {
+                XmlReaderSettings settings = new XmlReaderSettings();
+                settings.Async = true;
+                settings.DtdProcessing = DtdProcessing.Parse;
+                using(XmlReader reader = XmlReader.Create(st, settings))
+                {
+                    WorkspaceDictionary[Name].Content = await XDocument.LoadAsync(reader, loadOptions, cancellationToken);
+                    XNamespace ns = "http://www.qlcplus.org/Workspace";
+                    var values = WorkspaceDictionary[Name].Content.Root
+                        .Element(ns + "Engine")
+                        .Elements(ns + "Function")
+                        .Where(item => (string)item.Attribute("Type") == "RGBMatrix")
+                        .ToList();
+                    WorkspaceItemListViewModel model = new WorkspaceItemListViewModel();
+                    foreach (var item in values)
+                    {
+                        model.WorkspaceItems.Add(new RgbMatrix
+                        {
+                            Name = item.Attribute("Name").Value,
+                            Id = item.Attribute("ID").Value,
+                            Type = item.Attribute("Type").Value,
+                            Path = new Script { Name = item.Attribute("Path").Value }
+                        });
+                    }
+
+                    return model;
+                }
+            }
+
+        }
+
+        public async Task<WorkspaceItemListViewModel> GetWorkspaceAllItems(string Name, CancellationToken cancellationToken, LoadOptions loadOptions = LoadOptions.PreserveWhitespace)
+        {
+            var path = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot/Workspaces", Name);
+            using (StreamReader st = new StreamReader(path))
+            {
+                XmlReaderSettings settings = new XmlReaderSettings();
+                settings.Async = true;
+                settings.DtdProcessing = DtdProcessing.Parse;
+                using (XmlReader reader = XmlReader.Create(st, settings))
+                {
+                    WorkspaceDictionary[Name].Content = await XDocument.LoadAsync(reader, loadOptions, cancellationToken);
+                    XNamespace ns = "http://www.qlcplus.org/Workspace";
+                    var values = WorkspaceDictionary[Name].Content.Root
+                        .Element(ns + "Engine")
+                        .Elements(ns + "Function")
+                        .Where(item => (string)item.Attribute("Type") == "RGBMatrix" || (string)item.Attribute("Type") == "Script")
+                        .ToList();
+                    WorkspaceItemListViewModel model = new WorkspaceItemListViewModel();
+                    foreach (var item in values)
+                    {
+                        var attributeValue = item.Attribute("Type");
+                        if (attributeValue.Value == ("RGBMatrix"))
+                        {
+                            model.WorkspaceItems.Add(new RgbMatrix
+                            {
+                                Name = item.Attribute("Name").Value,
+                                Id = item.Attribute("ID").Value,
+                                Type = item.Attribute("Type").Value
+                            });
+                        }
+                        else if (attributeValue.Value == ("Script"))
+                        {
+                            model.WorkspaceItems.Add(new Script {
+                                Name = item.Attribute("Name").Value,
+                                Id = item.Attribute("ID").Value,
+                                Type = item.Attribute("Type").Value
+                            });
+                        }
+                    }                  
+                    return model;
+                }
+            }
+
+
+        }
+
+
 
         public void UpdateWorkspace(string WorkspaceName)
         {
