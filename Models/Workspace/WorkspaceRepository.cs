@@ -236,14 +236,15 @@ namespace ISLEParser.Models.Workspace
                 settings.DtdProcessing = DtdProcessing.Parse;
                 using (XmlReader reader = XmlReader.Create(st, settings))
                 {
-                    WorkspaceDictionary[Name].Content = await XDocument.LoadAsync(reader, loadOptions, cancellationToken);
+                    WorkspaceItemListViewModel model = new WorkspaceItemListViewModel();
+                    if (WorkspaceDictionary[Name].Content == null)                    
+                        WorkspaceDictionary[Name].Content = await XDocument.LoadAsync(reader, loadOptions, cancellationToken);
                     XNamespace ns = "http://www.qlcplus.org/Workspace";
                     var values = WorkspaceDictionary[Name].Content.Root
                         .Element(ns + "Engine")
                         .Elements(ns + "Function")
                         .Where(item => (string)item.Attribute("Type") == "Script")
                         .ToList();
-                    WorkspaceItemListViewModel model = new WorkspaceItemListViewModel();
                     foreach (var item in values)
                     {
                         model.WorkspaceItems.Add(new Script
@@ -254,7 +255,7 @@ namespace ISLEParser.Models.Workspace
                         });
                     }
                     reader.Dispose();
-                    
+                    reader.Close();
                     return model;
                 }
             }
