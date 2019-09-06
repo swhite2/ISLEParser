@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using ISLEParser.Models.WorkspaceItems;
 using ISLEParser.Models.RgbMatrices;
+using ISLEParser.Models.Home;
 
 namespace ISLEParser.Models.Scripts
 {

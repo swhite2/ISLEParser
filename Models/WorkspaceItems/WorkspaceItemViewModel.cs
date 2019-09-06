@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using ISLEParser.Models.Scripts;
 using ISLEParser.Models.RgbMatrices;
+using ISLEParser.Models.Home;
 
 namespace ISLEParser.Models.WorkspaceItems
 {
@@ -12,6 +13,8 @@ namespace ISLEParser.Models.WorkspaceItems
         //public WorkspaceItem WorkspaceItem { get; set; }
         public RgbMatrix RgbMatrix { get; set; }
         public Script Script { get; set; }
+        public FilesViewModel filesViewModel { get; set; }
+        public string WorkspaceName { get; set; }
 
         public enum Direction
         {

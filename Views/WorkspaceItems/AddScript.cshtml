@@ -1,20 +1,43 @@
-﻿@model ISLEParser.Models.Home.FilesViewModel
+﻿@model ISLEParser.Models.WorkspaceItems.WorkspaceItemViewModel
 
-<form method="post" enctype="multipart/form-data" asp-controller="Home" asp-action="UploadFileViaModel">
-    <div class="form-group">
-        <div class="col-md-10">
-            <p>Upload one or more files using this form:</p>
-            <input type="file" name="files" multiple>
-        </div>
-    </div>
-    <div class="form-group">
-        <div class="col-md-10">
-            <input type="submit" value="Upload">
-        </div>
-    </div>
-</form>
-
-@foreach(var item in Model.Files)
+@if (Model.filesViewModel.Files.Count == 0)
 {
-    @item.Name;
+    <form method="post" enctype="multipart/form-data" asp-controller="WorkspaceItems" asp-action="Post" asp-route-name="@Model.WorkspaceName">
+        <div class="form-group">
+            <div class="col-md-10">
+                <p>Upload one or more files using this form:</p>
+                <input type="file" name="files" multiple>
+            </div>
+        </div>
+        <div class="form-group">
+            <div class="col-md-10">
+                <input type="submit" value="Upload">
+            </div>
+        </div>
+    </form>
+}
+
+
+<table class="table table-dark">
+    <thead>
+        <tr>
+            <th class="text-center" scope="col">Uploaded Files</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model.filesViewModel.Files)
+        {
+
+            <tr>
+                <td class="text-center">@item.Name</td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+@if (Model.filesViewModel.Files.Count != 0)
+{
+    <div class="container">
+        <partial name="AddScriptPartialView" />
+    </div>
 }

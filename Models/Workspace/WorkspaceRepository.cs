@@ -12,6 +12,7 @@ using ISLEParser.Models.Scripts;
 using System.Xml.Linq;
 using ISLEParser.util;
 using System.Threading;
+using System.Text.RegularExpressions;
 
 namespace ISLEParser.Models.Workspace
 {
@@ -32,6 +33,90 @@ namespace ISLEParser.Models.Workspace
 
             }
 
+        }
+
+        public Script GenerateNewScript(List<string> fileNames, string WorkspaceName)
+        {
+            //Generate new Id?
+            //this method will NOT add it to the workspace, leave this to AddScript
+            string scriptName = (Regex.Replace(fileNames[0], "\\wuniverse[1-8]", String.Empty));
+            List<string> commands = new List<string>();
+            List<RgbMatrix> rgbMatrices = new List<RgbMatrix>();
+            for(int i = 0; i < 8; i++ ){
+                rgbMatrices.Add(GenerateNewRgbMatrix(WorkspaceName, scriptName, i.ToString(), i));
+                commands.Add("startfunction%3A" + rgbMatrices[i].Id + "%20%2F%2F%20" + rgbMatrices[i].Name);
+            }
+            //%3A = :
+            //%20 SPACE
+            //%2F = /
+            //%28 = (
+            //%29 = ) 
+            commands.Add("wait%3A300s");
+            Script script = new Script
+            {
+                Name = scriptName,
+                Type = "Script",
+                RgbMatrices = rgbMatrices,
+                Id = GetNewId(WorkspaceName, 1),
+                Commands = commands
+            };
+
+            return script;
+        }
+        
+        public RgbMatrix GenerateNewRgbMatrix(string WorkspaceName, string ScriptName, string fixtureGroup, int i)
+        {
+            //first rgbmatrices, then a script
+            string newId = GetNewId(WorkspaceName, i);
+            RgbMatrix rm = new RgbMatrix
+            {
+                Id = newId,
+                Name = ScriptName + "_" + newId,
+                Type = "RGBMatrix",
+                AlgorithmName = ScriptName,
+                FixtureGroup = fixtureGroup
+            };
+
+            return rm;
+        }
+
+        private string GetNewId(string WorkspaceName, int i)
+        {
+            var path = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot/Workspaces", WorkspaceName);
+            using (StreamReader st = new StreamReader(path))
+            {
+                XmlReaderSettings settings = new XmlReaderSettings();
+                settings.Async = true;
+                settings.DtdProcessing = DtdProcessing.Parse;
+                using (XmlReader reader = XmlReader.Create(st, settings))
+                {
+                    if (WorkspaceDictionary[WorkspaceName].Content == null)
+                        WorkspaceDictionary[WorkspaceName].Content = XDocument.Load(reader);
+                    XNamespace ns = "http://www.qlcplus.org/Workspace";
+                    var values = WorkspaceDictionary[WorkspaceName].Content.Root
+                        .Element(ns + "Engine")
+                        .Elements(ns + "Function")
+                        .Select(x => x.Attribute("ID"))
+                        .ToList();
+                    List<int> idList = new List<int>();
+                    foreach (var item in values)
+                    {
+                        idList.Add(Int32.Parse(item.Value));
+                    }
+                    int last = idList.Last();
+                    last += i;
+                    st.Dispose();
+                    st.Close();
+                    reader.Dispose();
+                    reader.Close();
+                    return last.ToString();
+                }
+            }
+        }
+
+        public Script AddScript(string WorkspaceName)
+        {
+            throw new NotImplementedException();
         }
 
         public Script GetWorkspaceScript(string Id, string WorkspaceName)

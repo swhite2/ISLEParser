@@ -16,6 +16,8 @@ namespace ISLEParser.Models.Workspace
     {
         //Interface for basic CRUD operations
         //Goes to WorkspaceRepository
+        Script GenerateNewScript(List<string> fileNames, string WorkspaceName);
+        RgbMatrix GenerateNewRgbMatrix(string WorkspaceName, string ScriptName, string fixtureGroup, int i);
         Workspace AddWorkspace(string name);
         void DeleteWorkspace(string Name);
         void UpdateWorkspace(string Name);
