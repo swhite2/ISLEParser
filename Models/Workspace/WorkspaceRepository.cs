@@ -35,16 +35,35 @@ namespace ISLEParser.Models.Workspace
 
         }
 
+        private XElement createRgbMatrixNode(RgbMatrix matrix)
+        {
+            XElement root = new XElement("Function");
+            root.Add(
+                new XAttribute("ID", matrix.Id),
+                new XAttribute("Type", matrix.Type),
+                new XAttribute("Name", matrix.Name),
+                new XAttribute("Path", matrix.Path.Name),
+                new XElement("Speed", 
+                    new XAttribute("FadeIn", matrix.SpeedFadeInAttribute),
+                    new XAttribute("FadeOut", matrix.SpeedFadeOutAttribute),
+                    new XAttribute("Duration", matrix.SpeedDurationAttribute)),
+                new XElement("Direction", matrix.Direction),
+                new XElement("RunOrder", matrix.RunOrder),
+                new XElement("DimmerControl", matrix.DimmerControl),
+                new XElement("MonoColor"),
+                new XElement("FixtureGroup", matrix.FixtureGroup)
+                );
+            return root;
+        }
+
         public Script GenerateNewScript(List<string> fileNames, string WorkspaceName)
         {
-            //Generate new Id?
-            //this method will NOT add it to the workspace, leave this to AddScript
             string scriptName = (Regex.Replace(fileNames[0], "\\wuniverse[1-8]", String.Empty));
             List<string> commands = new List<string>();
             List<RgbMatrix> rgbMatrices = new List<RgbMatrix>();
-            for(int i = 0; i < 8; i++ ){
+            for (int i = 1; i < 9; i++ ){
                 rgbMatrices.Add(GenerateNewRgbMatrix(WorkspaceName, scriptName, i.ToString(), i));
-                commands.Add("startfunction%3A" + rgbMatrices[i].Id + "%20%2F%2F%20" + rgbMatrices[i].Name);
+                commands.Add("startfunction%3A" + rgbMatrices[i-1].Id + "%20%2F%2F%20" + rgbMatrices[i-1].Name);
             }
             //%3A = :
             //%20 SPACE
@@ -57,7 +76,7 @@ namespace ISLEParser.Models.Workspace
                 Name = scriptName,
                 Type = "Script",
                 RgbMatrices = rgbMatrices,
-                Id = GetNewId(WorkspaceName, 1),
+                Id = GetNewId(WorkspaceName, 9),
                 Commands = commands
             };
 
@@ -66,21 +85,19 @@ namespace ISLEParser.Models.Workspace
         
         public RgbMatrix GenerateNewRgbMatrix(string WorkspaceName, string ScriptName, string fixtureGroup, int i)
         {
-            //first rgbmatrices, then a script
             string newId = GetNewId(WorkspaceName, i);
             RgbMatrix rm = new RgbMatrix
             {
                 Id = newId,
                 Name = ScriptName + "_" + newId,
                 Type = "RGBMatrix",
-                AlgorithmName = ScriptName,
+                AlgorithmName = ScriptName + "_U" + i.ToString(),
                 FixtureGroup = fixtureGroup
             };
-
             return rm;
         }
 
-        private string GetNewId(string WorkspaceName, int i)
+        private string GetNewId(string WorkspaceName, int offset)
         {
             var path = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot/Workspaces", WorkspaceName);
             using (StreamReader st = new StreamReader(path))
@@ -104,7 +121,7 @@ namespace ISLEParser.Models.Workspace
                         idList.Add(Int32.Parse(item.Value));
                     }
                     int last = idList.Last();
-                    last += i;
+                    last += offset;
                     st.Dispose();
                     st.Close();
                     reader.Dispose();
@@ -114,9 +131,17 @@ namespace ISLEParser.Models.Workspace
             }
         }
 
-        public Script AddScript(string WorkspaceName)
+        public void AddScript(string WorkspaceName, Script script)
         {
-            throw new NotImplementedException();
+            XNamespace ns = "http://www.qlcplus.org/Workspace";
+            foreach (var item in script.RgbMatrices)
+            {
+                WorkspaceDictionary[WorkspaceName].Content.Root
+                    .Element(ns + "Engine")
+                    .Element(ns + "Function")
+                    .Add(createRgbMatrixNode(item));
+            }
+            UpdateWorkspace(WorkspaceName);
         }
 
         public Script GetWorkspaceScript(string Id, string WorkspaceName)

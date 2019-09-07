@@ -60,10 +60,18 @@ namespace ISLEParser.Controllers
         //[HttpPost("ProcessScript")]
         public ViewResult AddScript(WorkspaceItemViewModel model, string Name)
         {
+            
             return View("AddScript", new WorkspaceItemViewModel {
                 filesViewModel = new FilesViewModel(),
                 WorkspaceName = Name
             });
+        }
+
+        [HttpPost("AddScriptInFile")]
+        public IActionResult AddScriptInFile(WorkspaceItemViewModel model, string Name)
+        {
+            repository.AddScript(Name, model.Script);
+            return Content("Script added");
         }
 
         //public IActionResult ProcessScript(WorkspaceItemViewModel model)
