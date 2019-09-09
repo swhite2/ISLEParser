@@ -13,6 +13,7 @@ using System.Xml.Linq;
 using ISLEParser.util;
 using System.Threading;
 using System.Text.RegularExpressions;
+using System.Text;
 
 namespace ISLEParser.Models.Workspace
 {
@@ -35,9 +36,10 @@ namespace ISLEParser.Models.Workspace
 
         }
 
-        private XElement createRgbMatrixNode(RgbMatrix matrix)
+        private XElement CreateRgbMatrixNode(RgbMatrix matrix)
         {
-            XElement root = new XElement("Function");
+            XNamespace ns = "http://www.qlcplus.org/Workspace";
+            XElement root = new XElement(ns + "Function");
             root.Add(
                 new XAttribute("ID", matrix.Id),
                 new XAttribute("Type", matrix.Type),
@@ -50,9 +52,31 @@ namespace ISLEParser.Models.Workspace
                 new XElement("Direction", matrix.Direction),
                 new XElement("RunOrder", matrix.RunOrder),
                 new XElement("DimmerControl", matrix.DimmerControl),
-                new XElement("MonoColor"),
+                new XElement("MonoColor", ""),
                 new XElement("FixtureGroup", matrix.FixtureGroup)
                 );
+            return root;
+        }
+
+        private XElement CreateScriptNode(Script script)
+        {
+            XNamespace ns = "http://www.qlcplus.org/Workspace";
+            XElement root = new XElement(ns + "Function");
+            root.Add(
+                new XAttribute("ID", script.Id),
+                new XAttribute("Type", script.Type),
+                new XAttribute("Name", script.Name),
+                new XElement("Speed",
+                    new XAttribute("FadeIn", script.SpeedFadeInAttribute),
+                    new XAttribute("FadeOut", script.SpeedFadeOutAttribute),
+                    new XAttribute("Duration", script.SpeedDurationAttribute)),
+                new XElement("Direction", script.Direction),
+                new XElement("RunOrder", script.RunOrder)               
+                );
+            foreach(var item in script.Commands)
+            {
+                root.Add(new XElement("Command", item));
+            }
             return root;
         }
 
@@ -62,8 +86,9 @@ namespace ISLEParser.Models.Workspace
             List<string> commands = new List<string>();
             List<RgbMatrix> rgbMatrices = new List<RgbMatrix>();
             for (int i = 1; i < 9; i++ ){
-                rgbMatrices.Add(GenerateNewRgbMatrix(WorkspaceName, scriptName, i.ToString(), i));
-                commands.Add("startfunction%3A" + rgbMatrices[i-1].Id + "%20%2F%2F%20" + rgbMatrices[i-1].Name);
+                rgbMatrices.Add(GenerateNewRgbMatrix(WorkspaceName, scriptName, (i - 1).ToString(), i));
+                //name of the rgb matrix should have its whitespace removed, then replaced with %20
+                commands.Add("startfunction%3A" + rgbMatrices[i - 1].Id + "%20%2F%2F%20" + rgbMatrices[i - 1].Name);
             }
             //%3A = :
             //%20 SPACE
@@ -92,7 +117,8 @@ namespace ISLEParser.Models.Workspace
                 Name = ScriptName + "_" + newId,
                 Type = "RGBMatrix",
                 AlgorithmName = ScriptName + "_U" + i.ToString(),
-                FixtureGroup = fixtureGroup
+                FixtureGroup = fixtureGroup,
+                Path = new Script { Name = ScriptName}
             };
             return rm;
         }
@@ -138,9 +164,11 @@ namespace ISLEParser.Models.Workspace
             {
                 WorkspaceDictionary[WorkspaceName].Content.Root
                     .Element(ns + "Engine")
-                    .Element(ns + "Function")
-                    .Add(createRgbMatrixNode(item));
+                    .Add(CreateRgbMatrixNode(item));
             }
+            WorkspaceDictionary[WorkspaceName].Content.Root
+                .Element(ns + "Engine")
+                .Add(CreateScriptNode(script));
             UpdateWorkspace(WorkspaceName);
         }
 
@@ -470,7 +498,18 @@ namespace ISLEParser.Models.Workspace
         {
             var path = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot/Workspaces", WorkspaceName);
             //save to file(overwrite)
-            WorkspaceDictionary[WorkspaceName].Content.Save(path, SaveOptions.None);
+            //Apply indentation
+            XmlWriterSettings xws = new XmlWriterSettings
+            {
+                Indent = true,
+                NewLineHandling = NewLineHandling.Entitize
+
+            };
+            using (XmlWriter writer = XmlWriter.Create(path, xws))
+            {
+                WorkspaceDictionary[WorkspaceName].Content.Save(writer);
+            }
+
             //Clean up memory
             GC.Collect();
         }

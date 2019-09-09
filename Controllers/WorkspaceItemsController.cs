@@ -58,26 +58,22 @@ namespace ISLEParser.Controllers
         }
 
         //[HttpPost("ProcessScript")]
-        public ViewResult AddScript(WorkspaceItemViewModel model, string Name)
+        public ViewResult AddScript(string Name)
         {
-            
-            return View("AddScript", new WorkspaceItemViewModel {
+            WorkspaceItemViewModel model = new WorkspaceItemViewModel
+            {
                 filesViewModel = new FilesViewModel(),
                 WorkspaceName = Name
-            });
+            };
+            return View("AddScript", model);
         }
 
-        [HttpPost("AddScriptInFile")]
+        [HttpPost]
         public IActionResult AddScriptInFile(WorkspaceItemViewModel model, string Name)
         {
             repository.AddScript(Name, model.Script);
-            return Content("Script added");
+            return RedirectToAction("GetWorkspaceScripts", "Workspace", new { name = Name});
         }
-
-        //public IActionResult ProcessScript(WorkspaceItemViewModel model)
-        //{
-        //    return View("AddScript", model);
-        //}
 
         [HttpPost("UploadFiles")]
         public IActionResult Post(List<IFormFile> files, string Name)
@@ -106,8 +102,15 @@ namespace ISLEParser.Controllers
             itemModel.filesViewModel = model;
             //Generate new script here?
             itemModel.Script = repository.GenerateNewScript(fileNames, Name);
+            foreach(var item in itemModel.Script.Commands)
+            {
+                Console.WriteLine(item);
+            }
+            itemModel.WorkspaceName = Name;
 
             return View("AddScript", itemModel);
+
+            //to fix: add tag helpers in AddScript.cshtml to bind the new model (asp-for)
 
         }
 

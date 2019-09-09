@@ -18,6 +18,17 @@ namespace ISLEParser.Models.Scripts
         public string Direction { get; set; } = "Forward";
         public string RunOrder { get; set; } = "Loop";
         public List<string> Commands { get; set; } = new List<string>();
+        public string CommandsAsString
+        {
+            get
+            {
+                return string.Join("\n", Commands);
+            }
+            set
+            {
+                Commands = value.Split(new char[] { ',' }).Select(x => x.Trim()).ToList();
+            }
+        }
 
     }
 
