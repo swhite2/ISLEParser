@@ -11,14 +11,19 @@
         <input type="file" name="files" multiple />
         <button type="submit">Upload Files</button>
     </form>*@
-
-<form class="text-center" asp-controller="Home" asp-action="UploadFileViaModel" method="post"
-      enctype="multipart/form-data">
-
-    <input type="file" name="FileToUpload" />
-    <button type="submit">Upload File (model)</button>
-</form>
-
 <div class="container">
-    <partial name="Files" />
+    <div class="col-md-8">
+    <form asp-controller="Home" asp-action="UploadFileViaModel" method="post"
+          enctype="multipart/form-data">
+
+        <input type="file" name="FileToUpload" />
+        <button type="submit">Upload Workspace</button>
+    </form>
+    </div>
 </div>
+
+
+
+            <div class="container">
+                <partial name="Files" />
+            </div>
