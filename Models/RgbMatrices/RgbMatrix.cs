@@ -24,7 +24,7 @@ namespace ISLEParser.Models.RgbMatrices
         public string AlgorithmName { get; set; }
         public string FixtureGroup { get; set; }
         public string DimmerControl { get; } = "1";
-        public string MonoColor { get; set; }
+        public string MonoColor { get; set; } = "0";
         
 
     }

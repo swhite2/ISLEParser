@@ -45,15 +45,17 @@ namespace ISLEParser.Models.Workspace
                 new XAttribute("Type", matrix.Type),
                 new XAttribute("Name", matrix.Name),
                 new XAttribute("Path", matrix.Path.Name),
-                new XElement("Speed", 
+                new XElement(ns + "Speed", 
                     new XAttribute("FadeIn", matrix.SpeedFadeInAttribute),
                     new XAttribute("FadeOut", matrix.SpeedFadeOutAttribute),
                     new XAttribute("Duration", matrix.SpeedDurationAttribute)),
-                new XElement("Direction", matrix.Direction),
-                new XElement("RunOrder", matrix.RunOrder),
-                new XElement("DimmerControl", matrix.DimmerControl),
-                new XElement("MonoColor", ""),
-                new XElement("FixtureGroup", matrix.FixtureGroup)
+                new XElement(ns + "Direction", matrix.Direction),
+                new XElement(ns + "RunOrder", matrix.RunOrder),
+                new XElement(ns + "Algorithm",
+                    new XAttribute("Type", matrix.AlgorithmTypeAttribute), matrix.AlgorithmName),
+                new XElement(ns + "DimmerControl", matrix.DimmerControl),
+                new XElement(ns + "MonoColor", ""),
+                new XElement(ns + "FixtureGroup", matrix.FixtureGroup)
                 );
             return root;
         }
@@ -66,16 +68,16 @@ namespace ISLEParser.Models.Workspace
                 new XAttribute("ID", script.Id),
                 new XAttribute("Type", script.Type),
                 new XAttribute("Name", script.Name),
-                new XElement("Speed",
+                new XElement(ns + "Speed",
                     new XAttribute("FadeIn", script.SpeedFadeInAttribute),
                     new XAttribute("FadeOut", script.SpeedFadeOutAttribute),
                     new XAttribute("Duration", script.SpeedDurationAttribute)),
-                new XElement("Direction", script.Direction),
-                new XElement("RunOrder", script.RunOrder)               
+                new XElement(ns + "Direction", script.Direction),
+                new XElement(ns + "RunOrder", script.RunOrder)               
                 );
             foreach(var item in script.Commands)
             {
-                root.Add(new XElement("Command", item));
+                root.Add(new XElement(ns + "Command", item));
             }
             return root;
         }
@@ -88,7 +90,7 @@ namespace ISLEParser.Models.Workspace
             for (int i = 1; i < 9; i++ ){
                 rgbMatrices.Add(GenerateNewRgbMatrix(WorkspaceName, scriptName, (i - 1).ToString(), i));
                 //name of the rgb matrix should have its whitespace removed, then replaced with %20
-                commands.Add("startfunction%3A" + rgbMatrices[i - 1].Id + "%20%2F%2F%20" + rgbMatrices[i - 1].Name);
+                commands.Add("startfunction%3A" + rgbMatrices[i - 1].Id + "%20%2F%2F%20" + rgbMatrices[i - 1].Name.Replace(" ", "%20").Replace("-", "%2D").Replace("_", "%5F"));
             }
             //%3A = :
             //%20 SPACE
@@ -175,7 +177,9 @@ namespace ISLEParser.Models.Workspace
         public Script GetWorkspaceScript(string Id, string WorkspaceName)
         {
             var path = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot/Workspaces", WorkspaceName);
-            XDocument doc = XDocument.Load(path);
+            XDocument doc = WorkspaceDictionary[WorkspaceName].Content;
+            if(doc == null)
+                doc = XDocument.Load(path);
             XNamespace ns = "http://www.qlcplus.org/Workspace";
 
             var value = doc.Root
@@ -215,8 +219,8 @@ namespace ISLEParser.Models.Workspace
                     Direction = item.Element(ns + "Direction").Value,
                     RunOrder = item.Element(ns + "RunOrder").Value,
                     AlgorithmName = item.Element(ns + "Algorithm").Value,
-                    MonoColor = item.Element(ns + "MonoColor").Value,
-                    FixtureGroup = item.Element(ns + "FixtureGroup").Value
+                    MonoColor = (string)item.Element(ns + "MonoColor").Value ?? "",
+                    FixtureGroup = item.Element(ns + "FixtureGroup").Value,
                 });
             }
 
@@ -244,14 +248,30 @@ namespace ISLEParser.Models.Workspace
         public void DeleteWorkspaceScript(string Id, string Name)
         {
             XNamespace ns = "http://www.qlcplus.org/Workspace";
+            var scriptName = WorkspaceDictionary[Name].Content.Root
+                .Element(ns + "Engine")
+                .Elements(ns + "Function")
+                .Where(x => (string)x.Attribute("ID") == Id && (string)x.Attribute("Type") == "Script")
+                .FirstOrDefault()
+                .Attribute("Name");
+
+            var rgbMatrices = WorkspaceDictionary[Name].Content.Root
+                .Element(ns + "Engine")
+                .Elements(ns + "Function")
+                .Where(item => (string)item.Attribute("Type") == "RGBMatrix" && (string)item.Attribute("Path") == scriptName.Value)
+                .ToList();
+
+            foreach(var item in rgbMatrices)
+            {
+                item.Remove();
+            }
+
             WorkspaceDictionary[Name].Content.Root
                 .Element(ns + "Engine")
                 .Elements(ns + "Function")
-                //.Where(item => (string)item.Attribute("Type") == "Script")
                 .Where(item => (string)item.Attribute("ID") == Id && (string)item.Attribute("Type") == "Script")
                 .FirstOrDefault()
                 .Remove();
-            
             UpdateWorkspace(Name);          
         }
 

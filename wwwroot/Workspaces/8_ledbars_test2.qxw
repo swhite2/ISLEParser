@@ -6343,76 +6343,15 @@
       <ValueStyle>1</ValueStyle>
       <Grid Width="5" Height="3" Depth="5" Units="0" />
     </Monitor>
-    <Function ID="32" Type="RGBMatrix" Name="Bubbles - 1085_32" Path="Bubbles - 1085">
-      <Speed FadeIn="0" FadeOut="0" Duration="300" xmlns="" />
-      <Direction xmlns="">Forward</Direction>
-      <RunOrder xmlns="">Loop</RunOrder>
-      <DimmerControl xmlns="">1</DimmerControl>
-      <MonoColor xmlns=""></MonoColor>
-      <FixtureGroup xmlns="">0</FixtureGroup>
-    </Function>
-    <Function ID="33" Type="RGBMatrix" Name="Bubbles - 1085_33" Path="Bubbles - 1085">
-      <Speed FadeIn="0" FadeOut="0" Duration="300" xmlns="" />
-      <Direction xmlns="">Forward</Direction>
-      <RunOrder xmlns="">Loop</RunOrder>
-      <DimmerControl xmlns="">1</DimmerControl>
-      <MonoColor xmlns=""></MonoColor>
-      <FixtureGroup xmlns="">1</FixtureGroup>
-    </Function>
-    <Function ID="34" Type="RGBMatrix" Name="Bubbles - 1085_34" Path="Bubbles - 1085">
-      <Speed FadeIn="0" FadeOut="0" Duration="300" xmlns="" />
-      <Direction xmlns="">Forward</Direction>
-      <RunOrder xmlns="">Loop</RunOrder>
-      <DimmerControl xmlns="">1</DimmerControl>
-      <MonoColor xmlns=""></MonoColor>
-      <FixtureGroup xmlns="">2</FixtureGroup>
-    </Function>
-    <Function ID="35" Type="RGBMatrix" Name="Bubbles - 1085_35" Path="Bubbles - 1085">
-      <Speed FadeIn="0" FadeOut="0" Duration="300" xmlns="" />
-      <Direction xmlns="">Forward</Direction>
-      <RunOrder xmlns="">Loop</RunOrder>
-      <DimmerControl xmlns="">1</DimmerControl>
-      <MonoColor xmlns=""></MonoColor>
-      <FixtureGroup xmlns="">3</FixtureGroup>
-    </Function>
-    <Function ID="36" Type="RGBMatrix" Name="Bubbles - 1085_36" Path="Bubbles - 1085">
-      <Speed FadeIn="0" FadeOut="0" Duration="300" xmlns="" />
-      <Direction xmlns="">Forward</Direction>
-      <RunOrder xmlns="">Loop</RunOrder>
-      <DimmerControl xmlns="">1</DimmerControl>
-      <MonoColor xmlns=""></MonoColor>
-      <FixtureGroup xmlns="">4</FixtureGroup>
-    </Function>
-    <Function ID="37" Type="RGBMatrix" Name="Bubbles - 1085_37" Path="Bubbles - 1085">
-      <Speed FadeIn="0" FadeOut="0" Duration="300" xmlns="" />
-      <Direction xmlns="">Forward</Direction>
-      <RunOrder xmlns="">Loop</RunOrder>
-      <DimmerControl xmlns="">1</DimmerControl>
-      <MonoColor xmlns=""></MonoColor>
-      <FixtureGroup xmlns="">5</FixtureGroup>
-    </Function>
-    <Function ID="38" Type="RGBMatrix" Name="Bubbles - 1085_38" Path="Bubbles - 1085">
-      <Speed FadeIn="0" FadeOut="0" Duration="300" xmlns="" />
-      <Direction xmlns="">Forward</Direction>
-      <RunOrder xmlns="">Loop</RunOrder>
-      <DimmerControl xmlns="">1</DimmerControl>
-      <MonoColor xmlns=""></MonoColor>
-      <FixtureGroup xmlns="">6</FixtureGroup>
-    </Function>
-    <Function ID="39" Type="RGBMatrix" Name="Bubbles - 1085_39" Path="Bubbles - 1085">
-      <Speed FadeIn="0" FadeOut="0" Duration="300" xmlns="" />
-      <Direction xmlns="">Forward</Direction>
-      <RunOrder xmlns="">Loop</RunOrder>
-      <DimmerControl xmlns="">1</DimmerControl>
-      <MonoColor xmlns=""></MonoColor>
-      <FixtureGroup xmlns="">7</FixtureGroup>
-    </Function>
-    <Function ID="40" Type="Script" Name="Bubbles - 1085">
-      <Speed FadeIn="0" FadeOut="0" Duration="300" xmlns="" />
-      <Direction xmlns="">Forward</Direction>
-      <RunOrder xmlns="">Loop</RunOrder>
-      <Command xmlns="">System.Collections.Generic.List`1[System.String]</Command>
-    </Function>
+    
+    
+    
+    
+    
+    
+    
+    
+    
   </Engine>
   <VirtualConsole>
     <Frame Caption="">

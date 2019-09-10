@@ -26,7 +26,7 @@ namespace ISLEParser.Models.Scripts
             }
             set
             {
-                Commands = value.Split(new char[] { ',' }).Select(x => x.Trim()).ToList();
+                Commands = value.Split(new char[] { '\n' }).Select(x => x.Trim()).ToList();
             }
         }
 
