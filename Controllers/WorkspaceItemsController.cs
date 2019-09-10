@@ -6,6 +6,11 @@ using System.Linq;
 using System.Threading.Tasks;
 using ISLEParser.Models.RgbMatrices;
 using ISLEParser.Models.Workspace;
+using Microsoft.AspNetCore.Http;
+using System.IO;
+using ISLEParser.Models.Home;
+using ISLEParser.Models.Scripts;
+using System.Text.RegularExpressions;
 
 namespace ISLEParser.Controllers
 {
@@ -52,10 +57,63 @@ namespace ISLEParser.Controllers
             throw new NotImplementedException();
         }
 
+        //[HttpPost("ProcessScript")]
         public ViewResult AddScript(string Name)
         {
-            return View("AddScript");
+            WorkspaceItemViewModel model = new WorkspaceItemViewModel
+            {
+                filesViewModel = new FilesViewModel(),
+                WorkspaceName = Name
+            };
+            return View("AddScript", model);
         }
+
+        [HttpPost]
+        public IActionResult AddScriptInFile(WorkspaceItemViewModel model, string Name)
+        {
+            repository.AddScript(Name, model.Script);
+            return RedirectToAction("GetWorkspaceScripts", "Workspace", new { name = Name});
+        }
+
+        [HttpPost("UploadFiles")]
+        public IActionResult Post(List<IFormFile> files, string Name)
+        {
+            long size = files.Sum(f => f.Length);
+
+
+            List<string> fileNames = new List<string>();
+            FilesViewModel model = new FilesViewModel();
+            WorkspaceItemViewModel itemModel = new WorkspaceItemViewModel();
+            foreach (var formFile in files)
+            {
+                fileNames.Add(Path.GetFileNameWithoutExtension(formFile.FileName));
+            }
+            foreach(var item in fileNames)
+            {
+                model.Files.Add(new FileDetails
+                {
+                    Name = item
+                });
+            }
+            if(fileNames.Count != 8)
+            {
+                return Content("Please select 8 files");
+            }
+            itemModel.filesViewModel = model;
+            //Generate new script here?
+            itemModel.Script = repository.GenerateNewScript(fileNames, Name);
+            foreach(var item in itemModel.Script.Commands)
+            {
+                Console.WriteLine(item);
+            }
+            itemModel.WorkspaceName = Name;
+
+            return View("AddScript", itemModel);
+
+            //to fix: add tag helpers in AddScript.cshtml to bind the new model (asp-for)
+
+        }
+
 
         public IActionResult EditSkill(int Id, string WorkspaceName)
         {

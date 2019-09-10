@@ -29,7 +29,7 @@ namespace ISLEParser
             //singleton toevoegen voor een workspacerepo
             services.AddSingleton<IWorkspaceRepository, WorkspaceRepository>();
             //services.AddTransient<IWorkspaceRepository, WorkspaceRepository>();
-            services.AddTransient<IRgbMatrixRepository, RgbMatrixRepository>();
+            //services.AddTransient<IRgbMatrixRepository, RgbMatrixRepository>();
  
         }
 
