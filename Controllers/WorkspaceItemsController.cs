@@ -6,6 +6,11 @@ using System.Linq;
 using System.Threading.Tasks;
 using ISLEParser.Models.RgbMatrices;
 using ISLEParser.Models.Workspace;
+using Microsoft.AspNetCore.Http;
+using System.IO;
+using ISLEParser.Models.Home;
+using ISLEParser.Models.Scripts;
+using System.Text.RegularExpressions;
 
 namespace ISLEParser.Controllers
 {
@@ -40,17 +45,78 @@ namespace ISLEParser.Controllers
         {
             if (Type.Equals("RGBMatrix"))
             {
-                //not implemented yet
+                repository.DeleteWorkspaceRgbMatrix(Id, Name);
+                TempData["workspaceItemDeleted"] = $"RGB Matrix with ID {Id} has been deleted";
+                return RedirectToAction("GetWorkspaceRgbMatrices", "Workspace", new { name = Name });
             }
             else
             {
                 repository.DeleteWorkspaceScript(Id, Name);
                 //TODO: Return partial view that confirms deletion
+                TempData["workspaceItemDeleted"] = $"Script with ID {Id} has been deleted, including all linked RGB Matrices";
                 return RedirectToAction("GetWorkspaceScripts", "Workspace", new { name = Name });
             }
-            //return RedirectToAction("GetWorkspaceScripts", "Workspace", Name);
             throw new NotImplementedException();
         }
+
+        //[HttpPost("ProcessScript")]
+        public ViewResult AddScript(string Name)
+        {
+            WorkspaceItemViewModel model = new WorkspaceItemViewModel
+            {
+                filesViewModel = new FilesViewModel(),
+                WorkspaceName = Name
+            };
+            return View("AddScript", model);
+        }
+
+        [HttpPost]
+        public IActionResult AddScriptInFile(WorkspaceItemViewModel model, string Name)
+        {
+            repository.AddScript(Name, model.Script);
+            TempData["scriptAdded"] = $"Added {model.Script.Name} with {model.Script.RgbMatrices.Count} new RGB Matrices";
+            return RedirectToAction("GetWorkspaceScripts", "Workspace", new { name = Name});
+        }
+
+        [HttpPost("UploadFiles")]
+        public IActionResult Post(List<IFormFile> files, string Name)
+        {
+            long size = files.Sum(f => f.Length);
+
+
+            List<string> fileNames = new List<string>();
+            FilesViewModel model = new FilesViewModel();
+            WorkspaceItemViewModel itemModel = new WorkspaceItemViewModel();
+            foreach (var formFile in files)
+            {
+                fileNames.Add(Path.GetFileNameWithoutExtension(formFile.FileName));
+            }
+            foreach(var item in fileNames)
+            {
+                model.Files.Add(new FileDetails
+                {
+                    Name = item
+                });
+            }
+            if(fileNames.Count != 8)
+            {
+                return Content("Please select 8 files");
+            }
+            itemModel.filesViewModel = model;
+            //Generate new script here?
+            itemModel.Script = repository.GenerateNewScript(fileNames, Name);
+            foreach(var item in itemModel.Script.Commands)
+            {
+                Console.WriteLine(item);
+            }
+            itemModel.WorkspaceName = Name;
+
+            return View("AddScript", itemModel);
+
+            //to fix: add tag helpers in AddScript.cshtml to bind the new model (asp-for)
+
+        }
+
 
         public IActionResult EditSkill(int Id, string WorkspaceName)
         {

@@ -11,14 +11,27 @@
         <input type="file" name="files" multiple />
         <button type="submit">Upload Files</button>
     </form>*@
+@if(TempData["message"] != null)
+{
+    <div class="alert alert-success text-center">@TempData["message"]</div>
+}
+@if(TempData["deleteMessage"] != null)
+{
+    <div class="alert alert-danger text-center">@TempData["deleteMessage"]</div>
+}
+<div class="container-fluid d-flex justify-content-center mt-5 mb-5">
+    <div class="col-md-8">
+    <form asp-controller="Home" asp-action="UploadFileViaModel" method="post"
+          enctype="multipart/form-data">
 
-<form class="text-center" asp-controller="Home" asp-action="UploadFileViaModel" method="post"
-      enctype="multipart/form-data">
-
-    <input type="file" name="FileToUpload" />
-    <button type="submit">Upload File (model)</button>
-</form>
-
-<div class="container">
-    <partial name="Files" />
+        <input type="file" name="FileToUpload" />
+        <button type="submit">Upload Workspace</button>
+    </form>
+    </div>
 </div>
+
+
+
+            <div class="container">
+                <partial name="Files" />
+            </div>

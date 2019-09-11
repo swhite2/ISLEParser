@@ -23,6 +23,7 @@ namespace ISLEParser.Controllers
         }
         public ViewResult Index()
         {
+            GC.Collect();
             var model = new WorkspaceListViewModel();
             foreach(var item in workspaceRepository.GetAllWorkspaces())
             {
@@ -48,7 +49,8 @@ namespace ISLEParser.Controllers
 
             }
             workspaceRepository.AddWorkspace(model.FileToUpload.GetFilename());
-            return RedirectToAction("GetWorkspaceScripts", "Workspace", new { name = model.FileToUpload.GetFilename() }) ;
+            TempData["message"] = $"{model.FileToUpload.FileName} has been added";
+            return RedirectToAction("Index") ;
         }
 
         public async Task<IActionResult> Download(string filename)

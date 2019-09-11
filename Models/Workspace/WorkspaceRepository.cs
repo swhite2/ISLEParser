@@ -11,6 +11,9 @@ using ISLEParser.Models.RgbMatrices;
 using ISLEParser.Models.Scripts;
 using System.Xml.Linq;
 using ISLEParser.util;
+using System.Threading;
+using System.Text.RegularExpressions;
+using System.Text;
 
 namespace ISLEParser.Models.Workspace
 {
@@ -25,230 +28,314 @@ namespace ISLEParser.Models.Workspace
             foreach(var item in this.fileProvider.GetDirectoryContents(""))
             {
 
-                
-                    //XmlDocument xmlDoc = new XmlDocument();
-                    //xmlDoc.Load(item.PhysicalPath);
-                    WorkspaceDictionary.Add(item.Name, new Workspace { Name = item.Name, Content = null });
+
+                WorkspaceDictionary.Add(item.Name, new Workspace { Name = item.Name});
 
 
             }
 
+        }
+
+        private XElement CreateRgbMatrixNode(RgbMatrix matrix)
+        {
+            XNamespace ns = "http://www.qlcplus.org/Workspace";
+            XElement root = new XElement(ns + "Function");
+            root.Add(
+                new XAttribute("ID", matrix.Id),
+                new XAttribute("Type", matrix.Type),
+                new XAttribute("Name", matrix.Name),
+                new XAttribute("Path", matrix.Path.Name),
+                new XElement(ns + "Speed", 
+                    new XAttribute("FadeIn", matrix.SpeedFadeInAttribute),
+                    new XAttribute("FadeOut", matrix.SpeedFadeOutAttribute),
+                    new XAttribute("Duration", matrix.SpeedDurationAttribute)),
+                new XElement(ns + "Direction", matrix.Direction),
+                new XElement(ns + "RunOrder", matrix.RunOrder),
+                new XElement(ns + "Algorithm",
+                    new XAttribute("Type", matrix.AlgorithmTypeAttribute), matrix.AlgorithmName),
+                new XElement(ns + "DimmerControl", matrix.DimmerControl),
+                new XElement(ns + "MonoColor", ""),
+                new XElement(ns + "FixtureGroup", matrix.FixtureGroup)
+                );
+            return root;
+        }
+
+        private XElement CreateScriptNode(Script script)
+        {
+            XNamespace ns = "http://www.qlcplus.org/Workspace";
+            XElement root = new XElement(ns + "Function");
+            root.Add(
+                new XAttribute("ID", script.Id),
+                new XAttribute("Type", script.Type),
+                new XAttribute("Name", script.Name),
+                new XElement(ns + "Speed",
+                    new XAttribute("FadeIn", script.SpeedFadeInAttribute),
+                    new XAttribute("FadeOut", script.SpeedFadeOutAttribute),
+                    new XAttribute("Duration", script.SpeedDurationAttribute)),
+                new XElement(ns + "Direction", script.Direction),
+                new XElement(ns + "RunOrder", script.RunOrder)               
+                );
+            foreach(var item in script.Commands)
+            {
+                root.Add(new XElement(ns + "Command", item));
+            }
+            return root;
+        }
+
+        public Script GenerateNewScript(List<string> fileNames, string WorkspaceName)
+        {
+            string scriptName = (Regex.Replace(fileNames[0], "\\wuniverse[1-8]", String.Empty));
+            List<string> commands = new List<string>();
+            List<RgbMatrix> rgbMatrices = new List<RgbMatrix>();
+            for (int i = 1; i < 9; i++ ){
+                rgbMatrices.Add(GenerateNewRgbMatrix(WorkspaceName, scriptName, (i - 1).ToString(), i));
+                //name of the rgb matrix should have its whitespace removed, then replaced with %20
+                commands.Add("startfunction%3A" + rgbMatrices[i - 1].Id + "%20%2F%2F%20" + rgbMatrices[i - 1].Name.Replace(" ", "%20").Replace("-", "%2D").Replace("_", "%5F"));
+            }
+            //%3A = :
+            //%20 SPACE
+            //%2F = /
+            //%28 = (
+            //%29 = ) 
+            commands.Add("wait%3A300s");
+            Script script = new Script
+            {
+                Name = scriptName,
+                Type = "Script",
+                RgbMatrices = rgbMatrices,
+                Id = GetNewId(WorkspaceName, 9),
+                Commands = commands
+            };
+
+            return script;
+        }
+        
+        public RgbMatrix GenerateNewRgbMatrix(string WorkspaceName, string ScriptName, string fixtureGroup, int i)
+        {
+            string newId = GetNewId(WorkspaceName, i);
+            RgbMatrix rm = new RgbMatrix
+            {
+                Id = newId,
+                Name = ScriptName + "_" + newId,
+                Type = "RGBMatrix",
+                AlgorithmName = ScriptName + "_U" + i.ToString(),
+                FixtureGroup = fixtureGroup,
+                Path = new Script { Name = ScriptName}
+            };
+            return rm;
+        }
+
+        private string GetNewId(string WorkspaceName, int offset)
+        {
+            var path = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot/Workspaces", WorkspaceName);
+            using (StreamReader st = new StreamReader(path))
+            {
+                XmlReaderSettings settings = new XmlReaderSettings();
+                settings.Async = true;
+                settings.DtdProcessing = DtdProcessing.Parse;
+                using (XmlReader reader = XmlReader.Create(st, settings))
+                {
+                    if (WorkspaceDictionary[WorkspaceName].Content == null)
+                        WorkspaceDictionary[WorkspaceName].Content = XDocument.Load(reader);
+                    XNamespace ns = "http://www.qlcplus.org/Workspace";
+                    var values = WorkspaceDictionary[WorkspaceName].Content.Root
+                        .Element(ns + "Engine")
+                        .Elements(ns + "Function")
+                        .Select(x => x.Attribute("ID"))
+                        .ToList();
+                    List<int> idList = new List<int>();
+                    foreach (var item in values)
+                    {
+                        idList.Add(Int32.Parse(item.Value));
+                    }
+                    int last = idList.Last();
+                    last += offset;
+                    st.Dispose();
+                    st.Close();
+                    reader.Dispose();
+                    reader.Close();
+                    return last.ToString();
+                }
+            }
+        }
+
+        public void AddScript(string WorkspaceName, Script script)
+        {
+            XNamespace ns = "http://www.qlcplus.org/Workspace";
+            foreach (var item in script.RgbMatrices)
+            {
+                WorkspaceDictionary[WorkspaceName].Content.Root
+                    .Element(ns + "Engine")
+                    .Add(CreateRgbMatrixNode(item));
+            }
+            WorkspaceDictionary[WorkspaceName].Content.Root
+                .Element(ns + "Engine")
+                .Add(CreateScriptNode(script));
+            UpdateWorkspace(WorkspaceName);
         }
 
         public Script GetWorkspaceScript(string Id, string WorkspaceName)
         {
-            Workspace ws = WorkspaceDictionary[WorkspaceName];
+            var path = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot/Workspaces", WorkspaceName);
+            XDocument doc = WorkspaceDictionary[WorkspaceName].Content;
+            if(doc == null)
+                doc = XDocument.Load(path);
+            XNamespace ns = "http://www.qlcplus.org/Workspace";
+
+            var value = doc.Root
+                .Element(ns + "Engine")
+                .Elements(ns + "Function")
+                .Where(item => (string)item.Attribute("Type") == "Script" && (string)item.Attribute("ID") == Id)
+                .FirstOrDefault();
+            var commandValues = doc.Root
+                .Element(ns + "Engine")
+                .Elements(ns + "Function")
+                .Where(item => (string)item.Attribute("Type") == "Script" && (string)item.Attribute("ID") == Id)
+                .Elements(ns + "Command")
+                .ToList();
+            List<string> commands = new List<string>();
             List<RgbMatrix> rgbMatrices = new List<RgbMatrix>();
-            XmlNodeList list = ws.Content.GetElementsByTagName("Function");
-            for (int i = 0; i < list.Count; i++)
+            var scriptName = value.Attribute("Name").Value;
+            var rgbMatricesValues = doc.Root
+                .Element(ns + "Engine")
+                .Elements(ns + "Function")
+                .Where(item => (string)item.Attribute("Type") == "RGBMatrix" && (string)item.Attribute("Path") == scriptName)
+                .ToList();
+            foreach (var item in commandValues)
             {
-                var attributeId = GetAttributeValue(list[i], "ID");
-                if (attributeId.Equals(Id))
-                {
-                    var attributeType = GetAttributeValue(list[i], "Type");
-                    if (attributeType == "Script")
-                    {
-                        Script script = new Script();
-                        var attributeNameScript = GetAttributeValue(list[i], "Name");
-                        for (int x = 0; x < list.Count; x++)
-                        {
-                            var attributeTypeRgbMatrixLoop = GetAttributeValue(list[x], "Type");
-                            var attributePathRgbMatrixLoop = GetAttributeValue(list[x], "Path");
-                            if (attributeTypeRgbMatrixLoop == "RGBMatrix" && attributeNameScript.Equals(attributePathRgbMatrixLoop))
-                            {
-                                var attributeNameRgbMatrix = GetAttributeValue(list[x], "Name");
-                                var attributeIdRgbMatrix = GetAttributeValue(list[x], "ID");
-                                var attributeTypeRgbMatrix = GetAttributeValue(list[x], "Type");
-                                //Parse details of the rgbmatrix (maybe use the below method of GetWorkspaceRgbMatrix?
-                                RgbMatrix rgbMatrix = new RgbMatrix
-                                {
-                                    Name = attributeNameRgbMatrix,
-                                    Id = attributeIdRgbMatrix,
-                                    Type = attributeTypeRgbMatrix,
-                                    Path = script
-                                };
-                                XmlNodeList rgbMatrixNodes = list[x].ChildNodes;
-                                for (int y = 0; y < rgbMatrixNodes.Count; y++)
-                                {
-                                    switch (rgbMatrixNodes[y].Name)
-                                    {
-                                        case "Speed":
-                                            rgbMatrix.SpeedFadeInAttribute = Int32.Parse(GetAttributeValue(rgbMatrixNodes[y], "FadeIn"));
-                                            rgbMatrix.SpeedFadeOutAttribute = Int32.Parse(GetAttributeValue(rgbMatrixNodes[y], "FadeOut"));
-                                            rgbMatrix.SpeedDurationAttribute = Int32.Parse(GetAttributeValue(rgbMatrixNodes[y], "Duration"));
-                                            break;
-                                        case "Direction":
-                                            rgbMatrix.Direction = rgbMatrixNodes[y].InnerText;
-                                            break;
-                                        case "RunOrder":
-                                            rgbMatrix.RunOrder = rgbMatrixNodes[y].InnerText;
-                                            break;
-                                        case "Algorithm":
-                                            rgbMatrix.AlgorithmName = rgbMatrixNodes[y].InnerText;
-                                            break;
-                                        case "DimmerControl":
-                                            break;
-                                        case "MonoColor":
-                                            rgbMatrix.MonoColor = rgbMatrixNodes[y].InnerText;
-                                            break;
-                                        case "FixtureGroup":
-                                            rgbMatrix.FixtureGroup = rgbMatrixNodes[y].InnerText;
-                                            break;
-                                        default:
-                                            break;
-                                    }
-
-                                }
-                                rgbMatrices.Add(rgbMatrix);
-                            }
-
-                        }
-                        script.Id = attributeId;
-                        script.Name = attributeNameScript;
-                        script.Type = attributeType;
-                        script.RgbMatrices = rgbMatrices;
-
-                        XmlNodeList childNodes = list[i].ChildNodes;
-                        for (int y = 0; y < childNodes.Count; y++)
-                        {
-                            switch (childNodes[y].Name)
-                            {
-                                case "Speed":
-                                    script.SpeedFadeInAttribute = Int32.Parse(GetAttributeValue(childNodes[y], "FadeIn"));
-                                    script.SpeedFadeOutAttribute = Int32.Parse(GetAttributeValue(childNodes[y], "FadeOut"));
-                                    script.SpeedDurationAttribute = Int32.Parse(GetAttributeValue(childNodes[y], "Duration"));
-                                    break;
-                                case "Direction":
-                                    script.Direction = childNodes[y].InnerText;
-                                    break;
-                                case "RunOrder":
-                                    script.RunOrder = childNodes[y].InnerText;
-                                    break;
-                                case "Command":
-                                    script.Commands.Add(childNodes[y].InnerText);
-                                    break;
-                                default:
-                                    break;
-                            }
-                        }
-
-                        return script;
-                    }
-                }
+                commands.Add(item.Value);
             }
-            throw new NotImplementedException();
+
+            foreach (var item in rgbMatricesValues)
+            {
+                rgbMatrices.Add(new RgbMatrix
+                {
+                    Id = item.Attribute("ID").Value,
+                    Type = item.Attribute("Type").Value,
+                    Name = item.Attribute("Name").Value,
+                    SpeedFadeInAttribute = item.Element(ns + "Speed").Attribute("FadeIn").Value,
+                    SpeedFadeOutAttribute = item.Element(ns + "Speed").Attribute("FadeOut").Value,
+                    SpeedDurationAttribute = item.Element(ns + "Speed").Attribute("Duration").Value,
+                    Direction = item.Element(ns + "Direction").Value,
+                    RunOrder = item.Element(ns + "RunOrder").Value,
+                    AlgorithmName = item.Element(ns + "Algorithm").Value,
+                    MonoColor = (string)item.Element(ns + "MonoColor").Value ?? "",
+                    FixtureGroup = item.Element(ns + "FixtureGroup").Value,
+                });
+            }
+
+            Script script = new Script
+            {
+                Name = scriptName,
+                Id = value.Attribute("ID").Value,
+                Type = value.Attribute("Type").Value,
+                SpeedFadeInAttribute = value.Element(ns + "Speed").Attribute("FadeIn").Value,
+                SpeedFadeOutAttribute = value.Element(ns + "Speed").Attribute("FadeOut").Value,
+                SpeedDurationAttribute = value.Element(ns + "Speed").Attribute("Duration").Value,
+                Direction = value.Element(ns + "Direction").Value,
+                RunOrder = value.Element(ns + "RunOrder").Value,
+                Commands = commands,
+                RgbMatrices = rgbMatrices
+            };
+
+            foreach(var item in rgbMatrices)
+            {
+                item.Path = script;
+            }
+            return script;
         }
 
         public void DeleteWorkspaceScript(string Id, string Name)
         {
-            XDocument doc = XDocument.Load(new XmlNodeReader(WorkspaceDictionary[Name].Content));
             XNamespace ns = "http://www.qlcplus.org/Workspace";
+            var scriptName = WorkspaceDictionary[Name].Content.Root
+                .Element(ns + "Engine")
+                .Elements(ns + "Function")
+                .Where(x => (string)x.Attribute("ID") == Id && (string)x.Attribute("Type") == "Script")
+                .FirstOrDefault()
+                .Attribute("Name");
 
-            //EXAMPLE:
+            var rgbMatrices = WorkspaceDictionary[Name].Content.Root
+                .Element(ns + "Engine")
+                .Elements(ns + "Function")
+                .Where(item => (string)item.Attribute("Type") == "RGBMatrix" && (string)item.Attribute("Path") == scriptName.Value)
+                .ToList();
 
-            //var values = doc.Root
-            //    .Element(ns + "Engine")
-            //    .Elements(ns + "Function")
-            //    .Where(item => (string)item.Attribute("Type") == "Script")
-            //    .Select(item => (string)item.Attribute("Name"))
-            //    .ToList();
+            foreach(var item in rgbMatrices)
+            {
+                item.Remove();
+            }
 
-            //.Select(item => (string)item.Attribute("Name"))
-            //.FirstOrDefault();
+            WorkspaceDictionary[Name].Content.Root
+                .Element(ns + "Engine")
+                .Elements(ns + "Function")
+                .Where(item => (string)item.Attribute("ID") == Id && (string)item.Attribute("Type") == "Script")
+                .FirstOrDefault()
+                .Remove();
+            UpdateWorkspace(Name);          
+        }
 
-            //foreach (var value in values)
-            //{
-            //    Console.WriteLine(value);
-            //}
-
-            doc.Root
+        public void DeleteWorkspaceRgbMatrix(string Id, string Name)
+        {
+            XNamespace ns = "http://www.qlcplus.org/Workspace";
+            WorkspaceDictionary[Name].Content.Root
                 .Element(ns + "Engine")
                 .Elements(ns + "Function")
                 //.Where(item => (string)item.Attribute("Type") == "Script")
-                .Where(item => (string)item.Attribute("ID") == Id && (string)item.Attribute("Type") == "Script")
+                .Where(item => (string)item.Attribute("ID") == Id && (string)item.Attribute("Type") == "RGBMatrix")
+                .FirstOrDefault()
                 .Remove();
 
-            WorkspaceDictionary[Name].Content = doc.ToXmlDocument();
             UpdateWorkspace(Name);
-            
-        }
-
-        public void DeleteWorkspaceRgbMatrix(string Id, string WorkspaceName)
-        {
-
         }
 
         public RgbMatrix GetWorkspaceRgbMatrix(string Id, string WorkspaceName)
         {
-            Workspace ws = WorkspaceDictionary[WorkspaceName];
-            XmlNodeList list = ws.Content.GetElementsByTagName("Function");
-            for(int i = 0; i < list.Count; i++)
+            var path = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot/Workspaces", WorkspaceName);
+            XDocument doc = WorkspaceDictionary[WorkspaceName].Content;
+            if (doc == null)
+                doc = XDocument.Load(path);
+            XNamespace ns = "http://www.qlcplus.org/Workspace";
+
+            var value = doc.Root
+                .Element(ns + "Engine")
+                .Elements(ns + "Function")
+                .Where(item => (string)item.Attribute("Type") == "RGBMatrix" && (string)item.Attribute("ID") == Id)
+                .FirstOrDefault();
+            List<RgbMatrix> rgbMatrices = new List<RgbMatrix>();
+            var rgbMatrixPath = value.Attribute("Path").Value;
+
+            var scriptId = doc.Root
+                .Element(ns + "Engine")
+                .Elements(ns + "Function")
+                .Where(item => (string)item.Attribute("Type") == "Script" && (string)item.Attribute("Name") == rgbMatrixPath)
+                .Select(x => x.Attribute("ID"))
+                .FirstOrDefault();
+
+            RgbMatrix rgbMatrix = new RgbMatrix
             {
-                var attributeId = GetAttributeValue(list[i], "ID");
-                if (attributeId.Equals(Id))
-                {
-                    var attributeType = GetAttributeValue(list[i], "Type");
-                    if (attributeType.Equals("RGBMatrix"))
-                    {
-
-                        Script script = new Script();
-                        var attributeNameRgbMatrix = GetAttributeValue(list[i], "Name");
-                        var attributePathRgbMatrix = GetAttributeValue(list[i], "Path");
-                    for (int x = 0; x < list.Count; x++)
-                    {
-                        var attributeTypeScript = GetAttributeValue(list[x], "Type");
-                        var attributeNameScript = GetAttributeValue(list[x], "Name");
-                        if (attributeTypeScript == "Script" && attributePathRgbMatrix.Equals(attributeNameScript))
-                        {
-                            var attributeIdScript = GetAttributeValue(list[x], "ID");
-
-                            script = GetWorkspaceScript(attributeIdScript, WorkspaceName);
-                        }
-                    }
-                    RgbMatrix rgbMatrix = new RgbMatrix
-                    {
-                        Name = attributeNameRgbMatrix,
-                        Id = attributeId,
-                        Type = attributeType,
-                        Path = script
-                    };
-                    XmlNodeList childNodes = list[i].ChildNodes;
-                    for (int y = 0; y < childNodes.Count; y++)
-                    {
-                        switch (childNodes[y].Name)
-                        {
-                            case "Speed":
-                                rgbMatrix.SpeedFadeInAttribute = Int32.Parse(GetAttributeValue(childNodes[y], "FadeIn"));
-                                rgbMatrix.SpeedFadeOutAttribute = Int32.Parse(GetAttributeValue(childNodes[y], "FadeOut"));
-                                rgbMatrix.SpeedDurationAttribute = Int32.Parse(GetAttributeValue(childNodes[y], "Duration"));
-                                break;
-                            case "Direction":
-                                rgbMatrix.Direction = childNodes[y].InnerText;
-                                break;
-                            case "RunOrder":
-                                rgbMatrix.RunOrder = childNodes[y].InnerText;
-                                break;
-                            case "Algorithm":
-                                rgbMatrix.AlgorithmName = childNodes[y].InnerText;
-                                break;
-                            case "DimmerControl":
-                                break;
-                            case "MonoColor":
-                                rgbMatrix.MonoColor = childNodes[y].InnerText;
-                                break;
-                            case "FixtureGroup":
-                                rgbMatrix.FixtureGroup = childNodes[y].InnerText;
-                                break;
-                            default:
-                                break;
-                        }
-
-                    }
-                    return rgbMatrix;
-                }
-                }
+                Name = value.Attribute("Name").Value,
+                Id = value.Attribute("ID").Value,
+                Type = value.Attribute("Type").Value,
+                SpeedFadeInAttribute = value.Element(ns + "Speed").Attribute("FadeIn").Value,
+                SpeedFadeOutAttribute = value.Element(ns + "Speed").Attribute("FadeOut").Value,
+                SpeedDurationAttribute = value.Element(ns + "Speed").Attribute("Duration").Value,
+                Direction = value.Element(ns + "Direction").Value,
+                RunOrder = value.Element(ns + "RunOrder").Value,               
+                //Path = GetWorkspaceScript(scriptId?.Attribute("ID")?.Value, WorkspaceName) ?? new Script { },
+                AlgorithmName = value.Element(ns + "Algorithm").Value,
+                MonoColor = value.Element(ns + "MonoColor").Value,
+                FixtureGroup = value.Element(ns + "FixtureGroup").Value
+            };
+            if (scriptId == null)
+            {
+                return rgbMatrix;
             }
-            throw new NotImplementedException();
+            else
+            {
+                rgbMatrix.Path = GetWorkspaceScript(scriptId.Value, WorkspaceName);
+                return rgbMatrix;
+            }
 
         }     
 
@@ -258,17 +345,17 @@ namespace ISLEParser.Models.Workspace
             {
                 throw new NotImplementedException();
             }
-            var path = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot/Workspaces", name);            
-            XmlDocument xmlDoc = new XmlDocument();
-            xmlDoc.Load(path);
-            if (xmlDoc.DocumentType.Name == null || !xmlDoc.DocumentType.Name.Equals("Workspace"))
+            string path = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot/Workspaces", name);
+            XDocument doc = XDocument.Load(path);
+            
+            if (doc.DocumentType.Name == null || !doc.DocumentType.Name.Equals("Workspace"))
             {
-                Console.WriteLine("Wrong Doctype! Doctype = " + xmlDoc.DocumentType.Name);
+                Console.WriteLine("Wrong Doctype! Doctype = " + doc.DocumentType.Name);
                 //TODO: Handle error/wrong input
             }
             Workspace ws = new Workspace {
                 Name = name,
-                Content = xmlDoc
+                Content = doc
             };
             
             WorkspaceDictionary.Add(name, ws);
@@ -305,120 +392,156 @@ namespace ISLEParser.Models.Workspace
 
 
 
-        public WorkspaceItemListViewModel GetWorkspaceScripts(string Name)
+        public async Task<WorkspaceItemListViewModel> GetWorkspaceScripts(string Name, CancellationToken cancellationToken, LoadOptions loadOptions = LoadOptions.PreserveWhitespace)
         {
-            Workspace ws = WorkspaceDictionary[Name];
-            XmlNodeList list = ws.Content.GetElementsByTagName("Function");
-            WorkspaceItemListViewModel model = new WorkspaceItemListViewModel();
-            for (int i = 0; i < list.Count; i++)
-            {
-                var attributeValue = GetAttributeValue(list[i], "Type");
-                if (attributeValue == "Script")
-                {
-                    var attributeName = GetAttributeValue(list[i], "Name");
-                    var attributeId = GetAttributeValue(list[i], "ID");
-                    try
-                    {
-                        var result = attributeId;
-                        model.WorkspaceItems.Add(new Script { Name = attributeName, Id = result, Type = attributeValue});
-                    }
-                    catch (FormatException)
-                    {
-                        Console.WriteLine($"Unable to parse '{attributeId}'");
-                    }
-                }
-            }
-            return model;
-
-        }
-
-        public WorkspaceItemListViewModel GetWorkspaceRgbMatrices(string Name)
-        {
-            //XmlDocument doc = new XmlDocument();
-            //WorkspaceDictionary[Name].Content = doc;
-            Workspace ws = WorkspaceDictionary[Name];
-            XmlNodeList list = ws.Content.GetElementsByTagName("Function");
-            WorkspaceItemListViewModel model = new WorkspaceItemListViewModel();
-            for(int i = 0; i < list.Count; i++)
-            {
-                var attributeValue = GetAttributeValue(list[i], "Type");
-                if(attributeValue == "RGBMatrix")
-                {
-                    var attributeName = GetAttributeValue(list[i], "Name");
-                    var attributePath = GetAttributeValue(list[i], "Path");
-                    var attributeId = GetAttributeValue(list[i], "ID");
-                    var result = attributeId;
-                    model.WorkspaceItems.Add(new RgbMatrix { Id = result, Name = attributeName, Path = new Script { Name = attributePath }, Type = attributeValue });
-                }
-            }
-            return model;        
-        }
-
-        public WorkspaceItemListViewModel GetWorkspaceAllItems(string Name)
-        {
-            //XmlDocument doc = new XmlDocument();
-            //WorkspaceDictionary[Name].Content = doc;
-            Workspace ws = WorkspaceDictionary[Name];
-
-            XmlNodeList list = ws.Content.GetElementsByTagName("Function");
-
-            var model = new WorkspaceItemListViewModel();
-            for (int i = 0; i < list.Count; i++)
-            {
-                var attributeValue = GetAttributeValue(list[i], "Type");
-                if (attributeValue == "RGBMatrix")
-                {
-                    var attributeName = GetAttributeValue(list[i], "Name");
-                    var attributePath = GetAttributeValue(list[i], "Path");
-                    var attributeId = GetAttributeValue(list[i], "ID");
-
-                    var result = attributeId;
-                    model.WorkspaceItems.Add(new RgbMatrix { Id = result, Name = attributeName, Path = new Script { Name = attributePath }, Type = attributeValue });
-                    
-
-
-                }
-                else if (attributeValue == "Script")
-                {
-                    var attributeName = GetAttributeValue(list[i], "Name");
-                    var attributeId = GetAttributeValue(list[i], "ID");
-                    model.WorkspaceItems.Add(new Script { Id = attributeId, Name = attributeName, Type = attributeValue });
-                }
-            }
-
-            return model;
-
-        }
-
-
-        public async void UpdateWorkspace(string Name)
-        {
-            //This method Flushes the content of the current XmlFile to the same file, replacing all data.
-            //IMPORTANT
-            //In order to properly generate a unique ID, both the RGBMatrices' and the Scripts' IDs need to be read, and start from the highest of those two (assuming there are no other functions)
             var path = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot/Workspaces", Name);
-            using(FileStream DestinationStream = File.Create(path))
+            using(StreamReader st = new StreamReader(path))
             {
-                await WriteXmlAsync(DestinationStream, WorkspaceDictionary[Name].Content);
-                //await DestinationStream.FlushAsync();
+                XmlReaderSettings settings = new XmlReaderSettings();
+                settings.Async = true;
+                settings.DtdProcessing = DtdProcessing.Parse;
+                using (XmlReader reader = XmlReader.Create(st, settings))
+                {
+                    if (WorkspaceDictionary[Name].Content == null)                    
+                        WorkspaceDictionary[Name].Content = await XDocument.LoadAsync(reader, loadOptions, cancellationToken);
+                    XNamespace ns = "http://www.qlcplus.org/Workspace";
+                    WorkspaceItemListViewModel model = new WorkspaceItemListViewModel();
+                    var values = WorkspaceDictionary[Name].Content.Root
+                        .Element(ns + "Engine")
+                        .Elements(ns + "Function")
+                        .Where(item => (string)item.Attribute("Type") == "Script")
+                        .ToList();
+                    foreach (var item in values)
+                    {
+                        model.WorkspaceItems.Add(new Script
+                        {
+                            Name = item.Attribute("Name").Value,
+                            Id = item.Attribute("ID").Value,
+                            Type = item.Attribute("Type").Value
+                        });
+                    }
+                    st.Dispose();
+                    st.Close();
+                    reader.Dispose();
+                    reader.Close();
+                    return model;
+                }
             }
+
         }
 
-        private async Task WriteXmlAsync(Stream stream, XmlDocument doc)
+        public async Task<WorkspaceItemListViewModel> GetWorkspaceRgbMatrices(string Name, CancellationToken cancellationToken, LoadOptions loadOptions = LoadOptions.PreserveWhitespace)
         {
-            XmlWriterSettings settings = new XmlWriterSettings();
-            settings.Async = true;
-            settings.Indent = true;
-            settings.CloseOutput = true;
-
-            using(XmlWriter writer = XmlWriter.Create(stream, settings))
+            var path = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot/Workspaces", Name);
+            using (StreamReader st = new StreamReader(path))
             {
-                await writer.WriteRawAsync(doc.InnerXml);
-                await writer.FlushAsync();
-                writer.Dispose();
-                writer.Close();
+                XmlReaderSettings settings = new XmlReaderSettings();
+                settings.Async = true;
+                settings.DtdProcessing = DtdProcessing.Parse;
+                using(XmlReader reader = XmlReader.Create(st, settings))
+                {
+                    if (WorkspaceDictionary[Name].Content == null)
+                        WorkspaceDictionary[Name].Content = await XDocument.LoadAsync(reader, loadOptions, cancellationToken);
+                    XNamespace ns = "http://www.qlcplus.org/Workspace";
+                    var values = WorkspaceDictionary[Name].Content.Root
+                        .Element(ns + "Engine")
+                        .Elements(ns + "Function")
+                        .Where(item => (string)item.Attribute("Type") == "RGBMatrix")
+                        .ToList();
+                    WorkspaceItemListViewModel model = new WorkspaceItemListViewModel();
+                    foreach (var item in values)
+                    {
+                        model.WorkspaceItems.Add(new RgbMatrix
+                        {
+                            Name = item.Attribute("Name").Value,
+                            Id = item.Attribute("ID").Value,
+                            Type = item.Attribute("Type").Value,
+                            Path = new Script { Name = item.Attribute("Path").Value }
+                        });
+                    }
+                    st.Dispose();
+                    st.Close();
+                    reader.Dispose();
+                    reader.Close();
+                    return model;
+                }
             }
+
         }
+
+        public async Task<WorkspaceItemListViewModel> GetWorkspaceAllItems(string Name, CancellationToken cancellationToken, LoadOptions loadOptions = LoadOptions.PreserveWhitespace)
+        {
+            var path = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot/Workspaces", Name);
+            using (StreamReader st = new StreamReader(path))
+            {
+                XmlReaderSettings settings = new XmlReaderSettings();
+                settings.Async = true;
+                settings.DtdProcessing = DtdProcessing.Parse;
+                using (XmlReader reader = XmlReader.Create(st, settings))
+                {
+                    if (WorkspaceDictionary[Name].Content == null)
+                        WorkspaceDictionary[Name].Content = await XDocument.LoadAsync(reader, loadOptions, cancellationToken);
+                    XNamespace ns = "http://www.qlcplus.org/Workspace";
+                    var values = WorkspaceDictionary[Name].Content.Root
+                        .Element(ns + "Engine")
+                        .Elements(ns + "Function")
+                        .Where(item => (string)item.Attribute("Type") == "RGBMatrix" || (string)item.Attribute("Type") == "Script")
+                        .ToList();
+                    WorkspaceItemListViewModel model = new WorkspaceItemListViewModel();
+                    foreach (var item in values)
+                    {
+                        var attributeValue = item.Attribute("Type");
+                        if (attributeValue.Value == ("RGBMatrix"))
+                        {
+                            model.WorkspaceItems.Add(new RgbMatrix
+                            {
+                                Name = item.Attribute("Name").Value,
+                                Id = item.Attribute("ID").Value,
+                                Type = item.Attribute("Type").Value
+                            });
+                        }
+                        else if (attributeValue.Value == ("Script"))
+                        {
+                            model.WorkspaceItems.Add(new Script {
+                                Name = item.Attribute("Name").Value,
+                                Id = item.Attribute("ID").Value,
+                                Type = item.Attribute("Type").Value
+                            });
+                        }
+                    }
+                    st.Dispose();
+                    st.Close();
+                    reader.Dispose();
+                    reader.Close();
+                    return model;
+                }
+            }
+
+
+        }
+
+
+
+        public void UpdateWorkspace(string WorkspaceName)
+        {
+            var path = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot/Workspaces", WorkspaceName);
+            //save to file(overwrite)
+            //Apply indentation
+            XmlWriterSettings xws = new XmlWriterSettings
+            {
+                Indent = true,
+                NewLineHandling = NewLineHandling.Entitize
+
+            };
+            using (XmlWriter writer = XmlWriter.Create(path, xws))
+            {
+                WorkspaceDictionary[WorkspaceName].Content.Save(writer);
+            }
+
+            //Clean up memory
+            GC.Collect();
+        }
+        
 
 
 
@@ -429,6 +552,7 @@ namespace ISLEParser.Models.Workspace
 
             if (ele.HasAttribute(attributeToFind))
                 returnValue = ele.GetAttribute(attributeToFind);
+
 
             return returnValue;
         }

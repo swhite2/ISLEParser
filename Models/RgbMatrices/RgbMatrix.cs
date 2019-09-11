@@ -13,17 +13,18 @@ namespace ISLEParser.Models.RgbMatrices
         public Script Path { get; set; }
 
         //Below are the single children nodes of 'Function'
-        public int SpeedFadeInAttribute { get; set; }
-        public int SpeedFadeOutAttribute { get; set; }
-        public int SpeedDurationAttribute { get; set; }
-        
-        public string Direction { get; set; }
-        public string RunOrder { get; set; }
+        public string SpeedFadeInAttribute { get; set; } = "0";
+        public string SpeedFadeOutAttribute { get; set; } = "0";
+        public string SpeedDurationAttribute { get; set; } = "300";
+
+
+        public string Direction { get; set; } = "Forward";
+        public string RunOrder { get; set; } = "Loop";
         public string AlgorithmTypeAttribute { get; } = "Script";
         public string AlgorithmName { get; set; }
         public string FixtureGroup { get; set; }
         public string DimmerControl { get; } = "1";
-        public string MonoColor { get; set; }
+        public string MonoColor { get; set; } = "0";
         
 
     }

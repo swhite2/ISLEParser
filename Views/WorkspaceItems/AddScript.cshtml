@@ -1,0 +1,113 @@
+﻿@model ISLEParser.Models.WorkspaceItems.WorkspaceItemViewModel
+
+@if (Model.filesViewModel.Files.Count == 0)
+{
+    <form method="post" enctype="multipart/form-data" asp-controller="WorkspaceItems" asp-action="Post" asp-route-name="@Model.WorkspaceName">
+        <div class="form-group">
+            <div class="col-md-10">
+                <p>Upload one or more files using this form:</p>
+                <input type="file" name="files" multiple>
+            </div>
+        </div>
+        <div class="form-group">
+            <div class="col-md-10">
+                <input type="submit" value="Upload">
+            </div>
+        </div>
+    </form>
+}
+
+
+@if (Model.filesViewModel.Files.Count != 0)
+{
+<div class="text-center">
+<div id="container" class="container-fluid h-100 bg-light text-dark text-center">
+    <div class="col-md-12">
+        <form class="text-lg-center my-4 bg-light" asp-action="AddScriptInFile" asp-controller="WorkspaceItems" asp-route-name="@Model.WorkspaceName" method="post">
+            <div class="form-group">
+                <input type="hidden" asp-for="Script.Id" value="@Model.Script.Id" />
+                <label for="exampleFormControlInput1">Function Name</label>
+                <input type="text" class="form-control text-center" asp-for="Script.Name" placeholder="@Model.Script.Name">
+            </div>
+            <div class="form-group">
+                <label for="exampleFormControlInput1">Function Type</label>
+                <input type="text" class="form-control text-center" asp-for="Script.Type" placeholder="@Model.Script.Type">
+            </div>
+
+            <div class="form-row">
+                <div class="form-group col-md-4">
+                    <label for="inputSpeedFadeIn">Speed - Fade In</label>
+                    <input type="text" class="form-control text-center" asp-for="Script.SpeedFadeInAttribute" placeholder="@Model.Script.SpeedFadeInAttribute">
+                </div>
+                <div class="form-group col-md-4">
+                    <label for="inputSpeedFadeOut">Speed - Fade Out</label>
+                    <input type="text" class="form-control text-center" asp-for="Script.SpeedFadeOutAttribute" placeholder="@Model.Script.SpeedFadeOutAttribute">
+                </div>
+                <div class="form-group col-md-4">
+                    <label for="inputSpeedDuration">Speed - Duration</label>
+                    <input type="text" class="form-control text-center" asp-for="Script.SpeedDurationAttribute" placeholder="@Model.Script.SpeedDurationAttribute">
+                </div>
+            </div>
+            <div class="form-group">
+                <label for="inputDirection">Direction</label>
+                <select class="form-control text-center" asp-for="Script.Direction">
+                    <option selected class="text-center">Forward</option>
+                    <option class="text-center">Backwards</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="inputRunOrder">Run Order</label>
+                <select class="form-control text-center" asp-for="Script.RunOrder">
+                    <option selected class="text-center">Loop</option>
+                    <option class="text-center">PingPong</option>
+                    <option class="text-center">SingleShot</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="standardCommands">Commands</label>
+                <textarea class="form-control text-center" asp-for="Script.CommandsAsString" rows="9">
+                    @Model.Script.CommandsAsString
+
+                </textarea>
+                <input type="hidden" asp-for="Script.Commands" value="@Model.Script.Commands"/>
+            </div>
+            <div class="form-group col">
+                <label><b>New RGB Matrices:</b></label>
+            </div>
+            <div class="table-responsive" style="text-align: center;">
+                <table align="center" class="table table-striped table-bordered table-dark text-center" style="display: inline-table">
+                    <thead class="text-center">
+                        <tr>
+                            <th scope="col">ID</th>
+                            <th scope="col">RGB Matrix</th>
+                            <th scope="col">JavaScript Algorithm Name</th>
+                            <th scope="col">RGB Panel</th>
+                            <th scope="col">Script Name</th>
+                            <th scope="col">Type</th>
+                            <th scope="col">MonoColor</th>
+                        </tr>
+                    </thead>
+                    <tbody class="text-center">
+                        @{ int i = 0;}
+                        @foreach (var item in Model.Script.RgbMatrices)
+                        {
+                        <tr>
+                            <th scope="row"><input asp-for="Script.RgbMatrices[i].Id" value="@item.Id" class=" text-center"/></th>
+                            <td><input asp-for="Script.RgbMatrices[i].Name" value="@item.Name" class=" text-center"/></td>
+                            <td><input asp-for="Script.RgbMatrices[i].AlgorithmName" value="@item.AlgorithmName" class=" text-center"/></td>
+                            <td><input asp-for="Script.RgbMatrices[i].FixtureGroup" value="@item.FixtureGroup" class=" text-center"/></td>
+                            <td><input asp-for="Script.RgbMatrices[i].Path.Name" value="@item.Path.Name" class=" text-center"/></td>
+                            <td><input asp-for="Script.RgbMatrices[i].Type" value="@item.Type" class=" text-center"/></td>
+                            <td><input asp-for="Script.RgbMatrices[i].MonoColor" value="@item.MonoColor" class=" text-center"/></td>
+                        </tr>
+                            i++;
+                        }
+                    </tbody>
+                </table>
+            </div>
+            <button type="submit" class="btn btn-primary" @*asp-action="AddScriptInFile" asp-controller="WorkspaceItems"*@>Submit</button>
+        </form>
+    </div>
+</div>
+    </div>
+}
