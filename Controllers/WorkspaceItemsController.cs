@@ -46,12 +46,14 @@ namespace ISLEParser.Controllers
             if (Type.Equals("RGBMatrix"))
             {
                 repository.DeleteWorkspaceRgbMatrix(Id, Name);
+                TempData["workspaceItemDeleted"] = $"RGB Matrix with ID {Id} has been deleted";
                 return RedirectToAction("GetWorkspaceRgbMatrices", "Workspace", new { name = Name });
             }
             else
             {
                 repository.DeleteWorkspaceScript(Id, Name);
                 //TODO: Return partial view that confirms deletion
+                TempData["workspaceItemDeleted"] = $"Script with ID {Id} has been deleted, including all linked RGB Matrices";
                 return RedirectToAction("GetWorkspaceScripts", "Workspace", new { name = Name });
             }
             throw new NotImplementedException();
@@ -72,6 +74,7 @@ namespace ISLEParser.Controllers
         public IActionResult AddScriptInFile(WorkspaceItemViewModel model, string Name)
         {
             repository.AddScript(Name, model.Script);
+            TempData["scriptAdded"] = $"Added {model.Script.Name} with {model.Script.RgbMatrices.Count} new RGB Matrices";
             return RedirectToAction("GetWorkspaceScripts", "Workspace", new { name = Name});
         }
 

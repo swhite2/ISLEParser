@@ -292,7 +292,9 @@ namespace ISLEParser.Models.Workspace
         public RgbMatrix GetWorkspaceRgbMatrix(string Id, string WorkspaceName)
         {
             var path = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot/Workspaces", WorkspaceName);
-            XDocument doc = XDocument.Load(path);
+            XDocument doc = WorkspaceDictionary[WorkspaceName].Content;
+            if (doc == null)
+                doc = XDocument.Load(path);
             XNamespace ns = "http://www.qlcplus.org/Workspace";
 
             var value = doc.Root
@@ -319,15 +321,21 @@ namespace ISLEParser.Models.Workspace
                 SpeedFadeOutAttribute = value.Element(ns + "Speed").Attribute("FadeOut").Value,
                 SpeedDurationAttribute = value.Element(ns + "Speed").Attribute("Duration").Value,
                 Direction = value.Element(ns + "Direction").Value,
-                RunOrder = value.Element(ns + "RunOrder").Value,
-                Path = GetWorkspaceScript(scriptId.Value, WorkspaceName),
+                RunOrder = value.Element(ns + "RunOrder").Value,               
+                //Path = GetWorkspaceScript(scriptId?.Attribute("ID")?.Value, WorkspaceName) ?? new Script { },
                 AlgorithmName = value.Element(ns + "Algorithm").Value,
                 MonoColor = value.Element(ns + "MonoColor").Value,
                 FixtureGroup = value.Element(ns + "FixtureGroup").Value
             };
-
-
-            return rgbMatrix;
+            if (scriptId == null)
+            {
+                return rgbMatrix;
+            }
+            else
+            {
+                rgbMatrix.Path = GetWorkspaceScript(scriptId.Value, WorkspaceName);
+                return rgbMatrix;
+            }
 
         }     
 

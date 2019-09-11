@@ -29,7 +29,8 @@ namespace ISLEParser.Controllers
         public IActionResult DeleteWorkspace(string name)
         {
             workspaceRepository.DeleteWorkspace(name);
-            return Content("File deleted");
+            TempData["deleteMessage"] = $"{name} has been deleted";
+            return RedirectToAction("Index", "Home");
         }
 
         //these functions should include caching, as all objects are stacked upon the large object heap

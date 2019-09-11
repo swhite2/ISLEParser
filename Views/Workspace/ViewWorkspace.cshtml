@@ -30,6 +30,16 @@
 }
 </style>
 
+@if(TempData["scriptAdded"] != null)
+{
+    <div class="alert alert-success text-center">@TempData["scriptAdded"]</div>
+}
+
+@if(TempData["workspaceItemDeleted"] != null)
+{
+    <div class="alert alert-danger text-center">@TempData["workspaceItemDeleted"]</div>
+}
+
 <div class="dropdown text-center">
     <button type="button" class="btn btn-primary dropdown-toggle" data-toggle="dropdown">
         Sort by
@@ -63,7 +73,7 @@
             <td class="text-center">@item.Name</td>
             <td class="text-center">@item.Type</td>
             <td class="text-center">
-                <a id="EditButton" asp-action="GetWorkspaceItem" asp-controller="WorkspaceItems" asp-route-id=@item.Id asp-route-name="@Model.WorkspaceName" asp-route-type="@item.Type">Edit</a>
+                <a id="EditButton" asp-action="GetWorkspaceItem" asp-controller="WorkspaceItems" asp-route-id=@item.Id asp-route-name="@Model.WorkspaceName" asp-route-type="@item.Type">View</a>
             </td>
             <td class="text-center">
                 <a id="DeleteButton" asp-action="DeleteWorkspaceItem" asp-controller="WorkspaceItems" asp-route-id=@item.Id asp-route-name="@Model.WorkspaceName" asp-route-type="@item.Type">Delete</a>
