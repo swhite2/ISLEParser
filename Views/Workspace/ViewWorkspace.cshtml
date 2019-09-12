@@ -28,6 +28,10 @@
   background-color: FireBrick;
   color: White;
 }
+
+table .collapse.in {
+    display:table-row;
+}
 </style>
 
 @if(TempData["scriptAdded"] != null)
@@ -55,30 +59,44 @@
     <a asp-action="AddScript" asp-controller="WorkspaceItems" asp-route-name="@Model.WorkspaceName" role="button">Add Script</a>
 </div>
 
-<table class="table table-dark">
+<table class="table table-dark table-hover">
     <thead>
         <tr>
             <th class="text-center" scope="col">ID</th>
             <th class="text-center" scope="col">Name</th>
             <th class="text-center" scope="col">Type</th>
-            <th class="text-center" scope="col">ModalLink</th>
+            <th class="text-center" scope="col">Options</th>
         </tr>
     </thead>
     <tbody>
         @foreach (var item in Model.WorkspaceItems)
         {
 
-        <tr>
+        <tr class="clickable" @*data-toggle="collapse" id="row@(item.Id)" data-target=".row@(item.Id)"*@>
+            
             <td class="text-center">@item.Id</td>
             <td class="text-center">@item.Name</td>
             <td class="text-center">@item.Type</td>
             <td class="text-center">
-                <a id="EditButton" asp-action="GetWorkspaceItem" asp-controller="WorkspaceItems" asp-route-id=@item.Id asp-route-name="@Model.WorkspaceName" asp-route-type="@item.Type">View</a>
+                <a id="EditButton" asp-action="ViewScript" asp-controller="WorkspaceItems" asp-route-id=@item.Id asp-route-name="@Model.WorkspaceName" asp-route-type="@item.Type">View</a>
             </td>
             <td class="text-center">
-                <a id="DeleteButton" asp-action="DeleteWorkspaceItem" asp-controller="WorkspaceItems" asp-route-id=@item.Id asp-route-name="@Model.WorkspaceName" asp-route-type="@item.Type">Delete</a>
+                <a id="DeleteButton" asp-action="DeleteWorkspaceItem" asp-controller="WorkspaceItems" asp-route-id=@item.Id asp-route-name="@Model.WorkspaceName" asp-route-type="@item.Type">Delete</a>             
             </td>
         </tr>
+        @*<tr class="collapse row@(item.Id)">
+            <td>
+                @foreach (KeyValuePair<string, string> sn in Model.scriptNames)
+                {
+                    if (sn.Key.Equals(item.Name))
+                    {
+                        <script src="/ScriptJs/@(sn.Value)"></script>
+                    }
+                }
+                <table id="map@(item.Id)">
+                </table>
+            </td>
+        </tr>*@
         }
 
 

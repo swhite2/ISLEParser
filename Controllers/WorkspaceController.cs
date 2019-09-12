@@ -14,6 +14,7 @@ using ISLEParser.Models.RgbMatrices;
 using ISLEParser.Models.Scripts;
 using System.Threading;
 using System.Xml.Linq;
+using System.Text.RegularExpressions;
 
 namespace ISLEParser.Controllers
 {
@@ -45,6 +46,18 @@ namespace ISLEParser.Controllers
         {
             WorkspaceItemListViewModel model = await workspaceRepository.GetWorkspaceScripts(Name, new CancellationToken(), new LoadOptions());
             model.WorkspaceName = Name;
+            //List<string> scriptNames = new List<string>();
+            //Dictionary<string, string> _scriptNames = new Dictionary<string, string>();
+            //foreach(var item in model.WorkspaceItems)
+            //{
+            //    foreach(var rgbMatrix in item.Script?.RgbMatrices/* ?? Enumerable.Empty<RgbMatrix>()*/)
+            //    {
+            //        string rgbMatrixScriptFileName = rgbMatrix.AlgorithmName.Replace(rgbMatrix.AlgorithmName, Regex.Replace(rgbMatrix.AlgorithmName, @".(?=.$)", "universe")) + ".js";
+            //        // newFileNames.Add(item.Replace(item, Regex.Replace(item, @".(?=.$)", "universe")) + ".js");
+            //        _scriptNames.Add(item.Name, rgbMatrixScriptFileName);
+            //    }
+            //}
+            //model.scriptNames = _scriptNames;
             return View("ViewWorkspace", model);
 
         }

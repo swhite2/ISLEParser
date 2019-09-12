@@ -8,8 +8,8 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Folder Include="wwwroot\js\" />
     <Folder Include="wwwroot\images\" />
+    <Folder Include="wwwroot\ScriptJs\" />
     <Folder Include="wwwroot\Workspaces\" />
   </ItemGroup>
 

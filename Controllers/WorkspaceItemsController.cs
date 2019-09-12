@@ -22,7 +22,18 @@ namespace ISLEParser.Controllers
             this.repository = repository;
         }
 
-        
+        public ViewResult ViewScript(string Id, string Name, string Type)
+        {
+            WorkspaceItemViewModel model = new WorkspaceItemViewModel();
+            model.Script = repository.GetWorkspaceScript(Id, Name);
+            List<string> _scriptNames = new List<string>();
+            foreach(var item in model.Script.RgbMatrices)
+            {
+                _scriptNames.Add(item.AlgorithmName.Replace(item.AlgorithmName, Regex.Replace(item.AlgorithmName, @".(?=.$)", "universe")).Replace(" ", "") + ".js");
+            }
+            model.scriptNames = _scriptNames;
+            return View("ViewScript", model);
+        }
 
         public IActionResult GetWorkspaceItem(string Id, string Name, string Type)
         {
@@ -79,10 +90,9 @@ namespace ISLEParser.Controllers
         }
 
         [HttpPost("UploadFiles")]
-        public IActionResult Post(List<IFormFile> files, string Name)
+        public async Task<IActionResult> Post(List<IFormFile> files, string Name)
         {
             long size = files.Sum(f => f.Length);
-
 
             List<string> fileNames = new List<string>();
             FilesViewModel model = new FilesViewModel();
@@ -90,6 +100,16 @@ namespace ISLEParser.Controllers
             foreach (var formFile in files)
             {
                 fileNames.Add(Path.GetFileNameWithoutExtension(formFile.FileName));
+                var filePath = Path.Combine(
+                    Directory.GetCurrentDirectory(), "wwwroot/ScriptJs",
+                    formFile.FileName.Replace(" ", ""));
+                if (formFile.Length > 0)
+                {
+                    using (var stream = new FileStream(filePath, FileMode.Create))
+                    {
+                        await formFile.CopyToAsync(stream);
+                    }
+                }
             }
             foreach(var item in fileNames)
             {
@@ -100,20 +120,14 @@ namespace ISLEParser.Controllers
             }
             if(fileNames.Count != 8)
             {
-                return Content("Please select 8 files");
+                TempData["fileNumberError"] = "Please upload exactly 8 scripts";
+                return RedirectToAction("AddScript");
             }
             itemModel.filesViewModel = model;
-            //Generate new script here?
             itemModel.Script = repository.GenerateNewScript(fileNames, Name);
-            foreach(var item in itemModel.Script.Commands)
-            {
-                Console.WriteLine(item);
-            }
             itemModel.WorkspaceName = Name;
 
             return View("AddScript", itemModel);
-
-            //to fix: add tag helpers in AddScript.cshtml to bind the new model (asp-for)
 
         }
 
