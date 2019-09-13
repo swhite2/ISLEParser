@@ -1,27 +1,31 @@
 ﻿@model ISLEParser.Models.WorkspaceItems.WorkspaceItemViewModel
-@*@foreach (var item in Model.scriptNames)
-{
-    <script src="/ScriptJs/@(item)"></script>
 
-}*@
-    <SCRIPT src="/js/algorithm.js"></SCRIPT>
-<SCRIPT src="/ScriptJs/Wave-23835_universe8.js"></SCRIPT>
+@{
+    Layout = null;
+}
+
+@foreach (var item in Model.scriptNames)
+{
+    <script src="~/ScriptJs/@(item)"></script>
+
+}
+<SCRIPT src="~/js//algorithm.js"></SCRIPT>
+<SCRIPT type="text/javascript">
+
+    var testTimer;
+
+    function startTest() {
+        var speed = document.getElementById("speed").value;
+        testTimer = window.setInterval("nextStep()", speed);
+    }
+
+    function stopTest() {
+        window.clearInterval(testTimer)
+    }
+
+</SCRIPT>
 
 <DIV onLoad="init()">
-    <SCRIPT type="text/javascript">
-
-        var testTimer;
-
-        function startTest() {
-            var speed = document.getElementById("speed").value;
-            testTimer = window.setInterval("nextStep()", speed);
-        }
-
-        function stopTest() {
-            window.clearInterval(testTimer)
-        }
-
-    </SCRIPT>
 
     <H2>Algorithm Properties</H2>
     <FORM>
@@ -43,8 +47,8 @@
 
     <H2>Grid Size</H2>
     <FORM>
-        Width: <INPUT TYPE="text" ID="width" SIZE="3" onChange="updateStepCount()" />
-        Height: <INPUT TYPE="text" ID="height" SIZE="3" onChange="updateStepCount()" />
+        Width: <INPUT TYPE="text" ID="width" SIZE="3" @*onChange="updateStepCount()"*@ value="6" />
+        Height: <INPUT TYPE="text" ID="height" SIZE="3" @*onChange="updateStepCount()"*@ value="28" />
         <INPUT TYPE="button" value="Update" onClick="updateStepCount()" /><BR>
     </FORM>
 
@@ -80,6 +84,6 @@
         </TR>
     </TABLE>
 
-    <TABLE ID="map">
+    <TABLE ID="map" class="table-responsive">
     </TABLE>
 </DIV>
