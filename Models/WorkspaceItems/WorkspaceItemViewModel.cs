@@ -15,6 +15,7 @@ namespace ISLEParser.Models.WorkspaceItems
         public Script Script { get; set; }
         public FilesViewModel filesViewModel { get; set; }
         public string WorkspaceName { get; set; }
+        public List<string> scriptNames { get; set; } = new List<string>();
 
         public enum Direction
         {

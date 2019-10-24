@@ -260,9 +260,10 @@ namespace ISLEParser.Models.Workspace
                 .Elements(ns + "Function")
                 .Where(item => (string)item.Attribute("Type") == "RGBMatrix" && (string)item.Attribute("Path") == scriptName.Value)
                 .ToList();
-
+            List<string> fileNames = new List<string>();
             foreach(var item in rgbMatrices)
             {
+                fileNames.Add(item.Element(ns + "Algorithm").Value);
                 item.Remove();
             }
 
@@ -272,6 +273,18 @@ namespace ISLEParser.Models.Workspace
                 .Where(item => (string)item.Attribute("ID") == Id && (string)item.Attribute("Type") == "Script")
                 .FirstOrDefault()
                 .Remove();
+
+            // string scriptName = (Regex.Replace(fileNames[0], "\\wuniverse[1-8]", String.Empty));
+            string rootFolderPath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot/ScriptJs");
+            //string fileExample = rgbMatrices[0].Element("Algorithm").Value;
+            List<string> newFileNames = new List<string>();
+            foreach(var item in fileNames)
+            {
+                newFileNames.Add(item.Replace(item, Regex.Replace(item, @".(?=.$)", "universe")) + ".js");
+            }
+            //string filesToDelete = (Regex.Replace(fileExample, "/.(?=.$)/gim", "universe"));
+            foreach (var fileName in newFileNames)               
+                File.Delete(rootFolderPath + $"/{fileName}");
             UpdateWorkspace(Name);          
         }
 
@@ -413,12 +426,13 @@ namespace ISLEParser.Models.Workspace
                         .ToList();
                     foreach (var item in values)
                     {
-                        model.WorkspaceItems.Add(new Script
-                        {
-                            Name = item.Attribute("Name").Value,
-                            Id = item.Attribute("ID").Value,
-                            Type = item.Attribute("Type").Value
-                        });
+                        //model.WorkspaceItems.Add(new Script
+                        //{
+                        //    Name = item.Attribute("Name").Value,
+                        //    Id = item.Attribute("ID").Value,
+                        //    Type = item.Attribute("Type").Value
+                        //});
+                        model.WorkspaceItems.Add(GetWorkspaceScript(item.Attribute("ID").Value, Name));
                     }
                     st.Dispose();
                     st.Close();

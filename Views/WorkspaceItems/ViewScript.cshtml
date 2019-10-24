@@ -1,0 +1,89 @@
+﻿@model ISLEParser.Models.WorkspaceItems.WorkspaceItemViewModel
+
+@{
+    Layout = null;
+}
+
+@foreach (var item in Model.scriptNames)
+{
+    <script src="~/ScriptJs/@(item)"></script>
+
+}
+<SCRIPT src="~/js//algorithm.js"></SCRIPT>
+<SCRIPT type="text/javascript">
+
+    var testTimer;
+
+    function startTest() {
+        var speed = document.getElementById("speed").value;
+        testTimer = window.setInterval("nextStep()", speed);
+    }
+
+    function stopTest() {
+        window.clearInterval(testTimer)
+    }
+
+</SCRIPT>
+
+<DIV onLoad="init()">
+
+    <H2>Algorithm Properties</H2>
+    <FORM>
+        <TABLE>
+            <TR>
+                <TD>apiVersion</TD>
+                <TD><INPUT TYPE="text" READONLY="readonly" size="3" ID="apiversion" /></TD>
+            </TR>
+            <TR>
+                <TD>name</TD>
+                <TD><INPUT TYPE="text" READONLY="readonly" ID="name" /></TD>
+            </TR>
+            <TR>
+                <TD>author</TD>
+                <TD><INPUT TYPE="text" READONLY="readonly" ID="author" /></TD>
+            </TR>
+        </TABLE>
+    </FORM>
+
+    <H2>Grid Size</H2>
+    <FORM>
+        Width: <INPUT TYPE="text" ID="width" SIZE="3" @*onChange="updateStepCount()"*@ value="6" />
+        Height: <INPUT TYPE="text" ID="height" SIZE="3" @*onChange="updateStepCount()"*@ value="28" />
+        <INPUT TYPE="button" value="Update" onClick="updateStepCount()" /><BR>
+    </FORM>
+
+    <H2>Pixel colors</H2>
+    <FORM>
+        Primary color:<INPUT TYPE="text" ID="color1" value="FF0000" SIZE="6" onChange="updateStepCount()" />
+        Secondary color:<INPUT TYPE="checkbox" ID="bicolor" onClick="writeCurrentStep()" />
+    </FORM>
+
+    <H2>Algorithm Functions</H2>
+    <FORM>
+        <TABLE>
+            <TR>
+                <TD>rgbMapStepCount(width, height)</TD>
+                <TD><INPUT TYPE="text" READONLY="readonly" size="3" ID="stepcount" /></TD>
+            </TR>
+        </TABLE>
+    </FORM>
+
+    <TABLE>
+        <TR>
+            <TD>rgbMap(width, height, rgb, <B>step</B>)</TD>
+            <TD>
+                <FORM>
+                    <INPUT TYPE="button" value="Previous" onClick="previousStep()" />
+                    <INPUT TYPE="text" ID="currentstep" size="3" onChange="writeCurrentStep()" />
+                    <INPUT TYPE="button" value="Next" onClick="nextStep()" /><BR>
+                    <INPUT TYPE="button" value="Start test" onClick="startTest()" />
+                    <INPUT TYPE="button" value="Stop test" onClick="stopTest()" />
+                    Speed (ms):<INPUT TYPE="text" ID="speed" size="5" value="500" />
+                </FORM>
+            </TD>
+        </TR>
+    </TABLE>
+
+    <TABLE ID="map" class="table-responsive">
+    </TABLE>
+</DIV>
