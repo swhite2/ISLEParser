@@ -9,7 +9,7 @@
     <script src="~/ScriptJs/@(item)"></script>
 
 }
-<SCRIPT src="~/js//algorithm.js"></SCRIPT>
+<SCRIPT src="~/js/algorithm.js"></SCRIPT>
 <SCRIPT type="text/javascript">
 
     var testTimer;
@@ -84,6 +84,10 @@
         </TR>
     </TABLE>
 
-    <TABLE ID="map" class="table-responsive">
-    </TABLE>
+    @for (int i = 1; i < 9; i++)
+    {
+        <TABLE ID="map@(i.ToString())" class="table-responsive">
+        </TABLE>
+    }
+
 </DIV>

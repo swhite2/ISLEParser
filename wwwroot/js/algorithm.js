@@ -20,15 +20,18 @@ function updateStepCount() {
     var stepCount = document.getElementById("stepcount");
     var currentStep = document.getElementById("currentstep");
 
-    if (w && h && stepCount && currentStep) {
-        stepCount.value = testAlgo.rgbMapStepCount(w.value, h.value);
-        currentStep.value = -1;
-        nextStep();
-        updateProperties();
+    for (var loop1 = 0; loop1 < 8; loop1++) {
+        if (w && h && stepCount && currentStep) {
+            stepCount.value = this['testAlgo' + (loop1 + 1).toString].rgbMapStepCount(w.value, h.value);
+            currentStep.value = -1;
+            nextStep();
+            updateProperties();
+        }
+        else {
+            alert("Width, Height or Result element not found!");
+        }
     }
-    else {
-        alert("Width, Height or Result element not found!");
-    }
+
 }
 
 function updateProperties() {
@@ -93,7 +96,16 @@ function previousStep() {
 }
 
 function writeCurrentStep() {
-    var map = document.getElementById("map");
+    var mapArray = [];
+    mapArray.push(document.getElementById("map1"));
+    mapArray.push(document.getElementById("map2"));
+    mapArray.push(document.getElementById("map3"));
+    mapArray.push(document.getElementById("map4"));
+    mapArray.push(document.getElementById("map5"));
+    mapArray.push(document.getElementById("map6"));
+    mapArray.push(document.getElementById("map7"));
+    mapArray.push(document.getElementById("map8"));
+
     var w = document.getElementById("width");
     var h = document.getElementById("height");
     var currentStep = document.getElementById("currentstep");
@@ -117,23 +129,26 @@ function writeCurrentStep() {
         var height = parseInt(h.value);
         var step = parseInt(currentStep.value);
 
-        for (var i = map.rows.length - 1; i >= 0; i--) {
-            map.deleteRow(i);
-        }
-        var rgb = testAlgo.rgbMap(width, height, currentRgb, step);
 
-        for (var y = 0; y < height; y++) {
-            var row = map.insertRow(y);
+        for (var loop1 = 0; loop1 < mapArray.length; loop1++) {
+            for (var i = mapArray[loop1].rows.length - 1; i >= 0; i--) {
+                mapArray[i].deleteRow(i);
+            }
+            this['rgb' + loop1(+1).toString] = this['testAlgo' + (loop1 + 1).toString].rgbMap(width, height, currentRgb, step);
 
-            for (var x = 0; x < width; x++) {
-                var cell = row.insertCell(x);
-                var rgbStr = rgb[y][x].toString(16);
-                while (rgbStr.length !== 6) {
-                    rgbStr = "0" + rgbStr;
+            for (var y = 0; y < height; y++) {
+                this['row' + loop1(+1).toString] = mapArray[loop1].insertRow(y);
+
+                for (var x = 0; x < width; x++) {
+                    var cell = this['row' + loop1(+1).toString].insertCell(x);
+                    var rgbStr = this['rgb' + loop1(+1).toString][y][x].toString(16);
+                    while (rgbStr.length !== 6) {
+                        rgbStr = "0" + rgbStr;
+                    }
+                    cell.style.backgroundColor = rgbStr;
+                    cell.style.height = 20;
+                    cell.style.width = 20;
                 }
-                cell.style.backgroundColor = rgbStr;
-                cell.style.height = 20;
-                cell.style.width = 20;
             }
         }
     }
